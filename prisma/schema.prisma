@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model GuildConfig {
+  guildId           String   @id
+  announceChannelId String?
+  deleteDisabledRoles Boolean @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  enabledGames      EnabledGame[]
+  roleMappings      GameRoleMapping[]
+}
+
+model EnabledGame {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  gameId    String
+  createdAt DateTime @default(now())
+
+  guild     GuildConfig @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+  @@unique([guildId, gameId])
+  @@index([guildId])
+}
+
+model GameRoleMapping {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  gameId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guild     GuildConfig @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+  @@unique([guildId, gameId])
+  @@index([guildId])
+}
+
+model UserOptIn {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  userId    String
+  optedIn   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guildId, userId])
+  @@index([guildId])
+  @@index([userId])
+}
+
+model UserGameRolePref {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  userId    String
+  gameId    String
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId, gameId])
+  @@index([guildId, userId])
+}
+
+model PromptCooldown {
+  id            Int      @id @default(autoincrement())
+  guildId       String
+  userId        String
+  gameId        String
+  lastPromptedAt DateTime @default(now())
+
+  @@unique([guildId, userId, gameId])
+  @@index([guildId, userId])
+}
+
+model ShareRequestState {
+  id         Int      @id @default(autoincrement())
+  guildId    String
+  userId     String
+  gameId     String
+  status     String   // "IN_FLIGHT" | "IDLE"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([guildId, userId, gameId])
+  @@index([guildId, userId])
+}
+
+model UserSharedDetails {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  userId    String
+  steamId   String?
+  serverName String?
+  serverIp  String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId])
+  @@index([guildId, userId])
+}

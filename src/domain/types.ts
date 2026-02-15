@@ -1,0 +1,10 @@
+export type DetailKind = "NONE" | "STEAM" | "SERVER_NAME" | "SERVER_IP";
+
+export type PendingShare = {
+  guildId: string;
+  userId: string;
+  gameId: string;
+  gameName: string;
+  detailKind: DetailKind;
+  detailValue?: string;
+};
