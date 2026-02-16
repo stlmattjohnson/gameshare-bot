@@ -1,13 +1,9 @@
 import { Presence } from "discord.js";
 import { optInService } from "../services/optInService.ts";
-import {
-  extractPlayingName,
-  matchPresenceToCatalog,
-} from "../services/gameDetectionService.ts";
-import { dmShareFlowService } from "../services/dmShareFlowService.ts";
+import { extractPlayingName } from "../services/gameDetectionService.ts";
 import { catalogService } from "../services/catalogService.ts";
+import { dmShareFlowService } from "../services/dmShareFlowService.ts";
 import { unknownGameRequestService } from "../services/unknownGameRequestService.ts";
-import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 import { logger } from "../logger.ts";
 import { guildConfigService } from "../services/guildConfigService.ts";
 
@@ -47,39 +43,34 @@ export const registerPresenceHandler = (client: any) => {
           return;
         }
 
-        const matched =
-          matchPresenceToCatalog(newName) ??
-          (await customGameRepo.findByName(guildId, newName));
-        if (!matched) return;
-
-        const enabled = await guildConfigService.isEnabled(guildId, matched.id);
+        const enabled = await guildConfigService.isEnabled(guildId, game.id);
         if (!enabled) return;
 
         const canPrompt = await dmShareFlowService.canPrompt(
           guildId,
           userId,
-          matched.id,
+          game.id,
         );
         if (!canPrompt) return;
 
         const inFlight = await dmShareFlowService.isInFlight(
           guildId,
           userId,
-          matched.id,
+          game.id,
         );
         if (inFlight) return;
 
         const user = await client.users.fetch(userId).catch(() => null);
         if (!user) return;
 
-        await dmShareFlowService.setInFlight(guildId, userId, matched.id, true);
-        await dmShareFlowService.markPrompted(guildId, userId, matched.id);
+        await dmShareFlowService.setInFlight(guildId, userId, game.id, true);
+        await dmShareFlowService.markPrompted(guildId, userId, game.id);
 
         await dmShareFlowService.sendInitialDm(user, {
           guildId,
           userId,
-          gameId: matched.id,
-          gameName: matched.name,
+          gameId: game.id,
+          gameName: game.name,
           detailKind: "NONE",
         });
       } catch (err) {

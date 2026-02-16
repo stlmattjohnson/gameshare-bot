@@ -6,7 +6,7 @@ import {
 } from "../../services/ux/userRolesUx.ts";
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo.ts";
-import { gameCatalog } from "../../catalog/catalog.ts";
+import { catalogService } from "../../services/catalogService.ts";
 import { roleService } from "../../services/roleService.ts";
 
 export const handleUserRolesPick = async (
@@ -45,11 +45,12 @@ export const handleUserRolesPick = async (
     await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId),
   );
 
-  const enabledGames = enabledIds
-    .map((id) => gameCatalog.getById(id))
-    .filter(Boolean as any);
+  const enabledGames = await catalogService.getAnyGamesByIds(
+    state.guildId,
+    enabledIds,
+  );
   const start = state.page * 20;
-  const pageItems = enabledGames.slice(start, start + 20).map((g) => g!.id);
+  const pageItems = enabledGames.slice(start, start + 20).map((g) => g.id);
 
   for (const g of pageItems) current.delete(g);
   for (const v of interaction.values) if (enabledSet.has(v)) current.add(v);

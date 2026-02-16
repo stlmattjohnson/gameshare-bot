@@ -5,7 +5,7 @@ import {
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
-import { gameCatalog } from "../../catalog/catalog.ts";
+import { catalogService } from "../../services/catalogService.ts";
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { resolveGuild } from "../utils.ts";
 
@@ -20,7 +20,7 @@ export const handleDmShareButtons = async (
   const { guildId, userId, gameId } = parsed;
   await interaction.deferUpdate().catch(() => null);
 
-  const game = gameCatalog.getById(gameId);
+  const game = await catalogService.getAnyGameById(guildId, gameId);
   const gameName = game?.name ?? "that game";
 
   const share: any = {

@@ -6,8 +6,7 @@ import {
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
-import { gameCatalog } from "../../catalog/catalog.ts";
-import { customGameRepo } from "../../db/repositories/customGameRepo.ts";
+import { catalogService } from "../../services/catalogService.ts";
 
 export const handleDmDetailPick = async (
   interaction: StringSelectMenuInteraction,
@@ -21,9 +20,7 @@ export const handleDmDetailPick = async (
   }
 
   const { guildId, userId, gameId } = parsed;
-  const game =
-    gameCatalog.getById(gameId) ??
-    (await customGameRepo.findById(guildId, gameId));
+  const game = await catalogService.getAnyGameById(guildId, gameId);
   const gameName = game?.name ?? "that game";
 
   const detailKind = (interaction.values[0] ?? "NONE") as any;

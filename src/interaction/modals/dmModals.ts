@@ -6,8 +6,7 @@ import {
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
-import { gameCatalog } from "../../catalog/catalog.ts";
-import { customGameRepo } from "../../db/repositories/customGameRepo.ts";
+import { catalogService } from "../../services/catalogService.ts";
 import { parseSessionCustomId } from "../utils.ts";
 
 export const handleDmModals = async (
@@ -29,9 +28,7 @@ export const handleDmModals = async (
     }
 
     const { guildId, userId, gameId } = parsed;
-    const game =
-      gameCatalog.getById(gameId) ??
-      (await customGameRepo.findById(guildId, gameId));
+    const game = await catalogService.getAnyGameById(guildId, gameId);
     const gameName = game?.name ?? "that game";
 
     const detailKind: any =

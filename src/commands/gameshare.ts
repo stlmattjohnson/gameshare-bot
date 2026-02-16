@@ -17,12 +17,11 @@ import {
 } from "../services/ux/userRolesUx.ts";
 import { optInService } from "../services/optInService.ts";
 import { userDataRepo } from "../db/repositories/userDataRepo.ts";
-import { gameCatalog } from "../catalog/catalog.ts";
+import { catalogService } from "../services/catalogService.ts";
 import {
   createAdminRequestsSession,
   renderAdminRequests,
 } from "../services/ux/adminRequestsUx.ts";
-import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 
 export const gameshareCommand = new SlashCommandBuilder()
   .setName("gameshare")
@@ -161,26 +160,12 @@ export const handleGameshare = async (
         interaction.guildId,
       );
 
-      const customIds = enabledIds.filter((id) => id.startsWith("cg_"));
-      const customNameMap = await customGameRepo.getNamesByIds(
+      const enabledGames = await catalogService.getAnyGamesByIds(
         interaction.guildId,
-        customIds,
+        enabledIds,
       );
 
-      const enabledNames = enabledIds
-        .map((id) => {
-          // static catalog
-          const staticName = gameCatalog.getById(id)?.name;
-          if (staticName) return staticName;
-
-          // custom game
-          const customName = customNameMap.get(id);
-          if (customName) return customName;
-
-          // fallback
-          return id;
-        })
-        .slice(0, 25);
+      const enabledNames = enabledGames.map((g) => g.name).slice(0, 25);
 
       const missingRoles = mappings
         .filter((m) => !interaction.guild?.roles.cache.has(m.roleId))
