@@ -17,6 +17,15 @@ export const guildConfigRepo = {
     });
   },
 
+  // NEW
+  async setRequestChannel(guildId: string, channelId: string | null) {
+    return prisma.guildConfig.upsert({
+      where: { guildId },
+      update: { requestChannelId: channelId },
+      create: { guildId, requestChannelId: channelId }
+    });
+  },
+
   async setDeleteDisabledRoles(guildId: string, enabled: boolean) {
     return prisma.guildConfig.upsert({
       where: { guildId },

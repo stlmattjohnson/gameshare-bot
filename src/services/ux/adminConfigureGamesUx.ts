@@ -9,10 +9,10 @@ import {
   TextInputStyle,
   InteractionUpdateOptions
 } from "discord.js";
-import { gameCatalog } from "../../catalog/catalog.js";
 import { CustomIds, PageSize, Limits } from "../../domain/constants.js";
 import { guildConfigService } from "../guildConfigService.js";
 import { StateStore } from "./stateStore.js";
+import { catalogService } from "../catalogService.js";
 
 export type AdminUxState = {
   guildId: string;
@@ -31,7 +31,7 @@ export async function renderAdminConfigure(
   sessionKey: string,
   state: AdminUxState
 ): Promise<InteractionUpdateOptions> {
-  const results = gameCatalog.search(state.query);
+  const results = await catalogService.searchAll(state.guildId, state.query);
   const start = state.page * PageSize.AdminGames;
   const pageItems = results.slice(start, start + PageSize.AdminGames);
 
@@ -52,7 +52,6 @@ export async function renderAdminConfigure(
 
   const components: any[] = [];
 
-  // Only render select menu when we have items; Discord rejects empty options/max_values=0.
   if (pageItems.length > 0) {
     const select = new StringSelectMenuBuilder()
       .setCustomId(`${CustomIds.AdminConfigureToggleSelect}|${sessionKey}`)
@@ -63,7 +62,7 @@ export async function renderAdminConfigure(
         pageItems.map((g) => ({
           label: g.name.slice(0, 100),
           value: g.id,
-          description: enabledIds.has(g.id) ? "Enabled" : "Disabled"
+          description: `${enabledIds.has(g.id) ? "Enabled" : "Disabled"}${g.kind === "CUSTOM" ? " • Custom" : ""}`
         }))
       );
 

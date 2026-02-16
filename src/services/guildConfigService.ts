@@ -5,6 +5,7 @@ import { gameRoleMapRepo } from "../db/repositories/gameRoleMapRepo.js";
 export const guildConfigService = {
   getOrCreate: guildConfigRepo.getOrCreate,
   setAnnounceChannel: guildConfigRepo.setAnnounceChannel,
+  setRequestChannel: guildConfigRepo.setRequestChannel, // NEW
   setDeleteDisabledRoles: guildConfigRepo.setDeleteDisabledRoles,
   listEnabledGameIds: enabledGameRepo.listEnabledGameIds,
   enableGame: enabledGameRepo.enable,

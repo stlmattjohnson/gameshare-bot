@@ -25,15 +25,27 @@ export const CustomIds = {
   DmModalServerName: "dm_modal_server_name",
   DmModalServerIp: "dm_modal_server_ip",
   DmConfirmPost: "dm_confirm_post",
-  DmCancelPost: "dm_cancel_post"
+  DmCancelPost: "dm_cancel_post",
+
+  // Unknown-game request buttons (DM)
+  UnknownRequestAdd: "unknown_req_add",
+  UnknownNotNow: "unknown_not_now",
+
+  // Admin review requests UI
+  AdminRequestsOpen: "admin_requests_open",
+  AdminRequestsPrev: "admin_requests_prev",
+  AdminRequestsNext: "admin_requests_next",
+  AdminRequestsDone: "admin_requests_done",
+  AdminRequestsApprove: "admin_requests_approve",
+  AdminRequestsReject: "admin_requests_reject",
 } as const;
 
 export const PageSize = {
   AdminGames: 20,
-  UserGames: 20
+  UserGames: 20,
 } as const;
 
 export const Limits = {
   SelectMaxOptions: 25,
-  EmbedFieldMax: 25
+  EmbedFieldMax: 25,
 } as const;

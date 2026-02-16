@@ -6,6 +6,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
+  Guild,
 } from "discord.js";
 import { logger } from "./logger.js";
 import { handleGameshare } from "./commands/gameshare.js";
@@ -30,6 +31,15 @@ import {
 import { dmShareFlowService } from "./services/dmShareFlowService.js";
 import { optInService } from "./services/optInService.js";
 import type { DetailKind, PendingShare } from "./domain/types.js";
+import { catalogService } from "./services/catalogService.js";
+import { unknownGameRequestService } from "./services/unknownGameRequestService.js";
+import {
+  adminRequestsUxStore,
+  renderAdminRequests,
+  renderAdminRequestsUpdate,
+} from "./services/ux/adminRequestsUx.js";
+import { adminRequestApprovalService } from "./services/adminRequestApprovalService.js";
+import { customGameRepo } from "./db/repositories/customGameRepo.js";
 
 function expiredMessage(cmd: string) {
   return {
@@ -41,11 +51,36 @@ function expiredMessage(cmd: string) {
 function parseSessionCustomId(customId: string): {
   base: string;
   key: string | null;
+  b: string | null;
 } {
   const parts = customId.split("|");
   const base = parts[0] ?? "";
   const key = parts[1] ?? null;
-  return { base, key };
+  const b = parts[2] ?? null;
+  return { base, key, b };
+}
+
+function b64urlEncode(s: string) {
+  return Buffer.from(s, "utf8").toString("base64url");
+}
+function b64urlDecode(s: string) {
+  return Buffer.from(s, "base64url").toString("utf8");
+}
+
+async function resolveGuild(
+  client: any,
+  guildId: string,
+): Promise<Guild | null> {
+  // Prefer cache; fetch if needed
+  const cached = client.guilds.cache.get(guildId) as Guild | undefined;
+  if (cached) return cached;
+
+  try {
+    const g = (await client.guilds.fetch(guildId)) as Guild;
+    return g;
+  } catch {
+    return null;
+  }
 }
 
 export function registerAppHandlers(client: any) {
@@ -61,7 +96,179 @@ export function registerAppHandlers(client: any) {
 
       // Admin + user UI buttons
       if (interaction.isButton()) {
-        const { base, key } = parseSessionCustomId(interaction.customId);
+        const {
+          base,
+          key,
+          b: encodedPresence,
+        } = parseSessionCustomId(interaction.customId);
+
+        // ----- Admin Requests UI Buttons -----
+        if (
+          base === CustomIds.AdminRequestsPrev ||
+          base === CustomIds.AdminRequestsNext ||
+          base === CustomIds.AdminRequestsDone
+        ) {
+          // These are sessionKey-based: <base>|<sessionKey>
+          if (!key)
+            return interaction.reply(
+              expiredMessage("/gameshare admin requests"),
+            );
+
+          const state = adminRequestsUxStore.get(key);
+          if (!state)
+            return interaction.reply(
+              expiredMessage("/gameshare admin requests"),
+            );
+          adminRequestsUxStore.touch(key);
+
+          // Admin perms
+          const memberPerms = interaction.memberPermissions;
+          const isAdmin =
+            memberPerms?.has(PermissionFlagsBits.ManageGuild) ||
+            memberPerms?.has(PermissionFlagsBits.Administrator);
+          if (!isAdmin)
+            return interaction.reply({
+              content: "Admin only.",
+              ephemeral: true,
+            });
+
+          if (base === CustomIds.AdminRequestsPrev) {
+            const next = adminRequestsUxStore.update(key, (s) => ({
+              ...s,
+              page: Math.max(0, s.page - 1),
+            }));
+            if (!next)
+              return interaction.reply(
+                expiredMessage("/gameshare admin requests"),
+              );
+            const ui = await renderAdminRequests(key, next);
+            const { ephemeral, ...updateOptions } = ui as any;
+            return interaction.update(updateOptions);
+          }
+
+          if (base === CustomIds.AdminRequestsNext) {
+            const next = adminRequestsUxStore.update(key, (s) => ({
+              ...s,
+              page: s.page + 1,
+            }));
+            if (!next)
+              return interaction.reply(
+                expiredMessage("/gameshare admin requests"),
+              );
+            const ui = await renderAdminRequests(key, next);
+            const { ephemeral, ...updateOptions } = ui as any;
+            return interaction.update(updateOptions);
+          }
+
+          if (base === CustomIds.AdminRequestsDone) {
+            adminRequestsUxStore.delete(key);
+            return interaction.update({
+              content: "✅ Done.",
+              embeds: [],
+              components: [],
+            });
+          }
+        }
+
+        if (
+          base === CustomIds.UnknownRequestAdd ||
+          base === CustomIds.UnknownNotNow
+        ) {
+          // Always ACK fast for DM button interactions
+          await interaction.deferUpdate().catch(() => null);
+
+          if (!key || !encodedPresence) {
+            await interaction.user
+              .send("That request expired.")
+              .catch(() => null);
+            await interaction.message
+              .edit({ components: [] })
+              .catch(() => null);
+            return;
+          }
+
+          const presenceName = decodeURIComponent(encodedPresence).trim();
+          if (!presenceName) {
+            await interaction.user
+              .send("That request expired.")
+              .catch(() => null);
+            await interaction.message
+              .edit({ components: [] })
+              .catch(() => null);
+            return;
+          }
+
+          // Remove buttons to prevent double-click spam
+          await interaction.message.edit({ components: [] }).catch(() => null);
+
+          if (base === CustomIds.UnknownNotNow) {
+            return; // user dismissed
+          }
+
+          // Create request row (dedupe inside service/repo)
+          const req = await unknownGameRequestService.createRequest(
+            key,
+            interaction.user.id,
+            presenceName,
+          );
+
+          if (!req) {
+            await interaction.user
+              .send(
+                "✅ A request for that game is already pending with the admins.",
+              )
+              .catch(() => null);
+            return;
+          }
+
+          const cfg = await guildConfigService.getOrCreate(key);
+          if (!cfg.requestChannelId) {
+            await interaction.user
+              .send(
+                "✅ Request created, but the server hasn’t set a request channel. Ask an admin to run `/gameshare admin set-request-channel`.",
+              )
+              .catch(() => null);
+            return;
+          }
+
+          // Resolve guild safely (same pattern you use elsewhere)
+          const guild = await resolveGuild(client, key);
+          if (!guild) {
+            await interaction.user
+              .send(
+                "✅ Request saved, but I can’t access that server right now.",
+              )
+              .catch(() => null);
+            return;
+          }
+
+          const ch = await guild.channels
+            .fetch(cfg.requestChannelId)
+            .catch(() => null);
+          if (!ch || ch.type !== ChannelType.GuildText) {
+            await interaction.user
+              .send(
+                "✅ Request saved, but the configured request channel is missing or not a text channel.",
+              )
+              .catch(() => null);
+            return;
+          }
+
+          await (ch as any).send(
+            [
+              `🆕 **Game Add Request**`,
+              `Requested by: <@${interaction.user.id}>`,
+              `Game name: **${presenceName}**`,
+              "",
+              "Admins: approve/reject in `/gameshare admin requests`.",
+            ].join("\n"),
+          );
+
+          await interaction.user
+            .send("✅ Sent to admins for review.")
+            .catch(() => null);
+          return;
+        }
 
         // ----- DM Share Flow Buttons -----
         if (
@@ -204,6 +411,106 @@ export function registerAppHandlers(client: any) {
             await interaction.user.send("✅ Posted!").catch(() => null);
             return;
           }
+        }
+
+        if (
+          base === CustomIds.AdminRequestsApprove ||
+          base === CustomIds.AdminRequestsReject
+        ) {
+          if (!key || !encodedPresence)
+            return interaction.reply(
+              expiredMessage("/gameshare admin requests"),
+            );
+
+          const state = adminRequestsUxStore.get(key);
+          if (!state)
+            return interaction.reply(
+              expiredMessage("/gameshare admin requests"),
+            );
+          adminRequestsUxStore.touch(key);
+
+          // Admin perms
+          const memberPerms = interaction.memberPermissions;
+          const isAdmin =
+            memberPerms?.has(PermissionFlagsBits.ManageGuild) ||
+            memberPerms?.has(PermissionFlagsBits.Administrator);
+          if (!isAdmin)
+            return interaction.reply({
+              content: "Admin only.",
+              ephemeral: true,
+            });
+
+          const requestId = Number(encodedPresence);
+          if (!Number.isFinite(requestId)) {
+            return interaction.reply({
+              content: "Invalid request id.",
+              ephemeral: true,
+            });
+          }
+
+          // ACK quickly to avoid "interaction failed"
+          await interaction.deferUpdate().catch(() => null);
+
+          if (base === CustomIds.AdminRequestsReject) {
+            const res = await adminRequestApprovalService.reject(
+              state.guildId,
+              requestId,
+            );
+            if (!res.ok) {
+              await interaction
+                .followUp({ content: `⚠️ ${res.message}`, ephemeral: true })
+                .catch(() => null);
+            }
+            const refreshed = adminRequestsUxStore.get(key);
+            if (!refreshed) return;
+            await interaction
+              .editReply(await renderAdminRequestsUpdate(key, refreshed))
+              .catch(() => null);
+            return;
+          }
+
+          // Approve: need the guild object
+          const guild = await resolveGuild(client, state.guildId);
+          if (!guild) {
+            await interaction
+              .followUp({
+                content:
+                  "I can’t access this server right now. Is the bot still in the guild?",
+                ephemeral: true,
+              })
+              .catch(() => null);
+            return;
+          }
+
+          const res = await adminRequestApprovalService.approve(
+            guild,
+            state.guildId,
+            requestId,
+          );
+          if (!res.ok) {
+            await interaction
+              .followUp({ content: `⚠️ ${res.message}`, ephemeral: true })
+              .catch(() => null);
+            // refresh UI anyway
+          } else {
+            const addLine = res.requesterRoleAdded
+              ? `✅ Added requester <@${res.requesterUserId}> to the role.`
+              : `⚠️ Could not add requester <@${res.requesterUserId}> to the role: ${res.requesterRoleAddMessage ?? "unknown reason"}`;
+
+            await interaction
+              .followUp({
+                content: `✅ Approved. Added **${res.gameName}** and enabled it for this server.\n${addLine}`,
+                ephemeral: true,
+              })
+              .catch(() => null);
+          }
+
+          const refreshed = adminRequestsUxStore.get(key);
+          if (!refreshed) return;
+          await interaction
+            .editReply(await renderAdminRequestsUpdate(key, refreshed))
+            .catch(() => null);
+          return;
         }
 
         // Admin "delete roles" options are keyed by guildId, not session
@@ -398,10 +705,7 @@ export function registerAppHandlers(client: any) {
 
           const { guildId, userId, gameId } = parsed;
 
-          // ACK fast
-          await interaction.deferUpdate().catch(() => null);
-
-          const game = gameCatalog.getById(gameId);
+          const game = gameCatalog.getById(gameId) ?? await customGameRepo.findById(guildId, gameId);
           const gameName = game?.name ?? "that game";
 
           const detailKind = (interaction.values[0] ?? "NONE") as DetailKind;
@@ -488,7 +792,10 @@ export function registerAppHandlers(client: any) {
               state.guildId,
               gameId,
             );
-            const game = gameCatalog.getById(gameId);
+            const game = await catalogService.getAnyGameById(
+              state.guildId,
+              gameId,
+            );
             if (!game) continue;
 
             if (!enabled) {
@@ -619,7 +926,7 @@ export function registerAppHandlers(client: any) {
 
           const { guildId, userId, gameId } = parsed;
 
-          const game = gameCatalog.getById(gameId);
+          const game = gameCatalog.getById(gameId) ?? (await customGameRepo.findById(guildId, gameId));
           const gameName = game?.name ?? "that game";
 
           const detailKind: DetailKind =
@@ -736,9 +1043,32 @@ export function registerAppHandlers(client: any) {
         const newName = extractPlayingName(newPresence);
 
         if (!newName) return;
-        if (oldName && oldName === newName) return; // still same game
+        //if (oldName && oldName === newName) return; // still same game
 
-        const matched = matchPresenceToCatalog(newName);
+        const game = await catalogService.matchPresence(guildId, newName);
+
+        if (!game) {
+          const ok = await unknownGameRequestService.shouldPrompt(
+            guildId,
+            userId,
+            newName,
+          );
+          if (!ok) return;
+
+          await unknownGameRequestService.markPrompted(
+            guildId,
+            userId,
+            newName,
+          );
+          await unknownGameRequestService
+            .sendUnknownPrompt(newPresence.user!, guildId, newName)
+            .catch(() => null);
+          return;
+        }
+
+        const matched =
+          matchPresenceToCatalog(newName) ??
+          (await customGameRepo.findByName(guildId, newName));
         if (!matched) return;
 
         const enabled = await guildConfigService.isEnabled(guildId, matched.id);

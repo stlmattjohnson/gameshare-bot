@@ -3,14 +3,15 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  InteractionReplyOptions,
   InteractionUpdateOptions,
   StringSelectMenuBuilder
 } from "discord.js";
 import { CustomIds, PageSize, Limits } from "../../domain/constants.js";
 import { guildConfigService } from "../guildConfigService.js";
-import { gameCatalog } from "../../catalog/catalog.js";
 import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo.js";
 import { StateStore } from "./stateStore.js";
+import { catalogService } from "../catalogService.js";
 
 export type UserRolesState = {
   guildId: string;
@@ -29,7 +30,7 @@ export async function renderUserRoles(
   state: UserRolesState
 ): Promise<InteractionUpdateOptions> {
   const enabledIds = await guildConfigService.listEnabledGameIds(state.guildId);
-  const enabledGames = enabledIds.map((id) => gameCatalog.getById(id)).filter(Boolean);
+  const enabledGames = await catalogService.getAnyGamesByIds(state.guildId, enabledIds);
 
   const selected = new Set(
     await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId)
@@ -59,9 +60,9 @@ export async function renderUserRoles(
       .setMaxValues(Math.min(Limits.SelectMaxOptions, pageItems.length))
       .addOptions(
         pageItems.map((g) => ({
-          label: g!.name.slice(0, 100),
-          value: g!.id,
-          description: selected.has(g!.id) ? "Selected" : "Not selected"
+          label: g.name.slice(0, 100),
+          value: g.id,
+          description: selected.has(g.id) ? "Selected" : "Not selected"
         }))
       );
 

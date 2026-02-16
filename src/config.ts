@@ -21,6 +21,7 @@ export const config = {
   databaseUrl: env.DATABASE_URL,
   logLevel: env.LOG_LEVEL,
   debugMode: (env.DEBUG_MODE ?? "false").toLowerCase() === "true",
-  promptCooldownMinutes: Number(env.PROMPT_COOLDOWN_MINUTES ?? "30"),
+  //promptCooldownMinutes: Number(env.PROMPT_COOLDOWN_MINUTES ?? "30"),
+  promptCooldownMinutes: 0,
   rolePrefix: env.ROLE_PREFIX ?? "Playing: "
 };

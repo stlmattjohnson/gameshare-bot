@@ -8,20 +8,23 @@ datasource db {
 }
 
 model GuildConfig {
-  guildId           String   @id
-  announceChannelId String?
-  deleteDisabledRoles Boolean @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  guildId              String   @id
+  announceChannelId    String?
+  requestChannelId     String?  // NEW: where to send "please add game" requests
+  deleteDisabledRoles  Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  enabledGames      EnabledGame[]
-  roleMappings      GameRoleMapping[]
+  enabledGames         EnabledGame[]
+  roleMappings         GameRoleMapping[]
+  customGames          CustomGame[]
+  addRequests          GameAddRequest[]
 }
 
 model EnabledGame {
   id        Int      @id @default(autoincrement())
   guildId   String
-  gameId    String
+  gameId    String    // can be static catalog id (e.g. g001) or custom id (e.g. cg_abc123)
   createdAt DateTime @default(now())
 
   guild     GuildConfig @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
@@ -42,6 +45,36 @@ model GameRoleMapping {
 
   @@unique([guildId, gameId])
   @@index([guildId])
+}
+
+model CustomGame {
+  id         String   @id // NEW: e.g. cg_<random>
+  guildId    String
+  name       String
+  // Optional: what presence text to match exactly (normalized comparison)
+  presenceName String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  guild      GuildConfig @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+  @@index([guildId])
+  @@unique([guildId, name])
+}
+
+model GameAddRequest {
+  id            Int      @id @default(autoincrement())
+  guildId       String
+  userId        String
+  presenceName  String   // what Discord shows as the activity name
+  status        String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  guild         GuildConfig @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+  @@index([guildId])
+  @@index([guildId, status])
 }
 
 model UserOptIn {
@@ -69,13 +102,24 @@ model UserGameRolePref {
 }
 
 model PromptCooldown {
-  id            Int      @id @default(autoincrement())
-  guildId       String
-  userId        String
-  gameId        String
+  id             Int      @id @default(autoincrement())
+  guildId        String
+  userId         String
+  gameId         String
   lastPromptedAt DateTime @default(now())
 
   @@unique([guildId, userId, gameId])
+  @@index([guildId, userId])
+}
+
+model UnknownGamePromptCooldown {
+  id             Int      @id @default(autoincrement())
+  guildId        String
+  userId         String
+  presenceName   String
+  lastPromptedAt DateTime @default(now())
+
+  @@unique([guildId, userId, presenceName])
   @@index([guildId, userId])
 }
 
@@ -84,7 +128,7 @@ model ShareRequestState {
   guildId    String
   userId     String
   gameId     String
-  status     String   // "IN_FLIGHT" | "IDLE"
+  status     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -93,14 +137,14 @@ model ShareRequestState {
 }
 
 model UserSharedDetails {
-  id        Int      @id @default(autoincrement())
-  guildId   String
-  userId    String
-  steamId   String?
+  id         Int      @id @default(autoincrement())
+  guildId    String
+  userId     String
+  steamId    String?
   serverName String?
-  serverIp  String?
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  serverIp   String?
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
 
   @@unique([guildId, userId])
   @@index([guildId, userId])
