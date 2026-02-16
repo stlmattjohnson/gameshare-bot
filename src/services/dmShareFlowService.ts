@@ -94,6 +94,7 @@ export const dmShareFlowService = {
   },
 
   async sendInitialDm(user: User, share: PendingShare) {
+    console.log({user, share})
     const embed = new EmbedBuilder()
       .setTitle("Share your game?")
       .setDescription(
