@@ -20,17 +20,26 @@ export const roleService = {
       const role = await guild.roles.create({
         name: roleName,
         mentionable: true,
-        reason: "GameShare: enabled game role"
+        reason: "GameShare: enabled game role",
       });
-      logger.info({ guildId: guild.id, roleId: role.id, roleName }, "Created role");
+      logger.info(
+        { guildId: guild.id, roleId: role.id, roleName },
+        "Created role",
+      );
       return role;
     } catch (err) {
-      logger.error({ err, guildId: guild.id, roleName }, "Failed creating role");
+      logger.error(
+        { err, guildId: guild.id, roleName },
+        "Failed creating role",
+      );
       throw err;
     }
   },
 
-  async canManageRole(guild: Guild, role: Role): Promise<{ ok: boolean; reason?: string }> {
+  async canManageRole(
+    guild: Guild,
+    role: Role,
+  ): Promise<{ ok: boolean; reason?: string }> {
     const me = guild.members.me;
     if (!me) return { ok: false, reason: "Bot not in guild member cache." };
 
@@ -41,5 +50,5 @@ export const roleService = {
       return { ok: false, reason: "Bot role is not higher than target role." };
     }
     return { ok: true };
-  }
+  },
 };

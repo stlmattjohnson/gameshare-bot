@@ -5,7 +5,7 @@ export const guildConfigRepo = {
     return prisma.guildConfig.upsert({
       where: { guildId },
       update: {},
-      create: { guildId }
+      create: { guildId },
     });
   },
 
@@ -13,7 +13,7 @@ export const guildConfigRepo = {
     return prisma.guildConfig.upsert({
       where: { guildId },
       update: { announceChannelId: channelId },
-      create: { guildId, announceChannelId: channelId }
+      create: { guildId, announceChannelId: channelId },
     });
   },
 
@@ -22,7 +22,7 @@ export const guildConfigRepo = {
     return prisma.guildConfig.upsert({
       where: { guildId },
       update: { requestChannelId: channelId },
-      create: { guildId, requestChannelId: channelId }
+      create: { guildId, requestChannelId: channelId },
     });
   },
 
@@ -30,7 +30,7 @@ export const guildConfigRepo = {
     return prisma.guildConfig.upsert({
       where: { guildId },
       update: { deleteDisabledRoles: enabled },
-      create: { guildId, deleteDisabledRoles: enabled }
+      create: { guildId, deleteDisabledRoles: enabled },
     });
-  }
+  },
 };

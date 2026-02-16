@@ -35,7 +35,10 @@ export const gameCatalog = {
       if (aliased) return aliased;
     }
     // Heuristic: remove trailing " (…)" or " - …"
-    const simplified = norm.replace(/\s*\(.*\)\s*$/, "").replace(/\s*-\s*.*$/, "").trim();
+    const simplified = norm
+      .replace(/\s*\(.*\)\s*$/, "")
+      .replace(/\s*-\s*.*$/, "")
+      .trim();
     return byNormName.get(simplified) ?? null;
-  }
+  },
 };

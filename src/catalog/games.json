@@ -110,7 +110,11 @@
   { "id": "g100", "name": "Civilization VI", "steamAppId": 289070 },
 
   { "id": "g101", "name": "Civilization V", "steamAppId": 8930 },
-  { "id": "g102", "name": "Age of Empires II: Definitive Edition", "steamAppId": 813780 },
+  {
+    "id": "g102",
+    "name": "Age of Empires II: Definitive Edition",
+    "steamAppId": 813780
+  },
   { "id": "g103", "name": "Age of Empires IV", "steamAppId": 1466860 },
   { "id": "g104", "name": "Total War: WARHAMMER III", "steamAppId": 1142710 },
   { "id": "g105", "name": "XCOM 2", "steamAppId": 268500 },
@@ -118,12 +122,20 @@
   { "id": "g107", "name": "Darkest Dungeon II", "steamAppId": 1940340 },
   { "id": "g108", "name": "Slay the Spire", "steamAppId": 646570 },
   { "id": "g109", "name": "Dead Cells", "steamAppId": 588650 },
-  { "id": "g110", "name": "The Binding of Isaac: Rebirth", "steamAppId": 250900 },
+  {
+    "id": "g110",
+    "name": "The Binding of Isaac: Rebirth",
+    "steamAppId": 250900
+  },
 
   { "id": "g111", "name": "Enter the Gungeon", "steamAppId": 311690 },
   { "id": "g112", "name": "Cuphead", "steamAppId": 268910 },
   { "id": "g113", "name": "Hollow Knight", "steamAppId": 367520 },
-  { "id": "g114", "name": "Ori and the Will of the Wisps", "steamAppId": 1057090 },
+  {
+    "id": "g114",
+    "name": "Ori and the Will of the Wisps",
+    "steamAppId": 1057090
+  },
   { "id": "g115", "name": "Ori and the Blind Forest", "steamAppId": 261570 },
   { "id": "g116", "name": "Celeste", "steamAppId": 504230 },
   { "id": "g117", "name": "Disco Elysium", "steamAppId": 632470 },
@@ -149,7 +161,11 @@
   { "id": "g135", "name": "Battlefield V" },
   { "id": "g136", "name": "Battlefield 1" },
   { "id": "g137", "name": "Halo Infinite" },
-  { "id": "g138", "name": "Halo: The Master Chief Collection", "steamAppId": 976730 },
+  {
+    "id": "g138",
+    "name": "Halo: The Master Chief Collection",
+    "steamAppId": 976730
+  },
   { "id": "g139", "name": "Splitgate", "steamAppId": 677620 },
   { "id": "g140", "name": "Warhammer 40,000: Darktide", "steamAppId": 1361210 },
 
@@ -171,7 +187,11 @@
   { "id": "g155", "name": "Dragon Ball FighterZ", "steamAppId": 678950 },
   { "id": "g156", "name": "Persona 5 Royal", "steamAppId": 1687950 },
   { "id": "g157", "name": "Persona 3 Reload" },
-  { "id": "g158", "name": "Final Fantasy VII Remake Intergrade", "steamAppId": 1462040 },
+  {
+    "id": "g158",
+    "name": "Final Fantasy VII Remake Intergrade",
+    "steamAppId": 1462040
+  },
   { "id": "g159", "name": "Final Fantasy XVI" },
   { "id": "g160", "name": "NieR:Automata", "steamAppId": 524220 },
 
@@ -182,7 +202,11 @@
   { "id": "g165", "name": "Lies of P" },
   { "id": "g166", "name": "Armored Core VI: Fires of Rubicon" },
   { "id": "g167", "name": "Star Wars Jedi: Survivor" },
-  { "id": "g168", "name": "Star Wars Jedi: Fallen Order", "steamAppId": 1172380 },
+  {
+    "id": "g168",
+    "name": "Star Wars Jedi: Fallen Order",
+    "steamAppId": 1172380
+  },
   { "id": "g169", "name": "Resident Evil 4 (2023)" },
   { "id": "g170", "name": "Resident Evil Village", "steamAppId": 1196590 },
 
@@ -194,7 +218,11 @@
   { "id": "g176", "name": "The Last of Us Part I", "steamAppId": 1888930 },
   { "id": "g177", "name": "God of War", "steamAppId": 1593500 },
   { "id": "g178", "name": "God of War Ragnarök" },
-  { "id": "g179", "name": "Marvel's Spider-Man Remastered", "steamAppId": 1817070 },
+  {
+    "id": "g179",
+    "name": "Marvel's Spider-Man Remastered",
+    "steamAppId": 1817070
+  },
   { "id": "g180", "name": "Horizon Zero Dawn", "steamAppId": 1151640 },
 
   { "id": "g181", "name": "Horizon Forbidden West" },
@@ -202,7 +230,11 @@
   { "id": "g183", "name": "Assassin's Creed Valhalla" },
   { "id": "g184", "name": "Assassin's Creed Mirage" },
   { "id": "g185", "name": "Assassin's Creed Odyssey", "steamAppId": 812140 },
-  { "id": "g186", "name": "Tom Clancy's Rainbow Six Siege", "steamAppId": 359550 },
+  {
+    "id": "g186",
+    "name": "Tom Clancy's Rainbow Six Siege",
+    "steamAppId": 359550
+  },
   { "id": "g187", "name": "The Legend of Zelda: Tears of the Kingdom" },
   { "id": "g188", "name": "The Legend of Zelda: Breath of the Wild" },
   { "id": "g189", "name": "Super Smash Bros. Ultimate" },

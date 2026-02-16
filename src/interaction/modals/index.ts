@@ -4,10 +4,16 @@ import { CustomIds } from "../../domain/constants.ts";
 import { handleDmModals } from "./dmModals.ts";
 import { handleAdminConfigureSearch } from "./adminConfigureSearch.ts";
 
-export async function handleModalInteraction(interaction: ModalSubmitInteraction): Promise<boolean | InteractionResponse<boolean>> {
+export async function handleModalInteraction(
+  interaction: ModalSubmitInteraction,
+): Promise<boolean | InteractionResponse<boolean>> {
   const { base } = parseSessionCustomId(interaction.customId);
 
-  if (base === CustomIds.DmModalSteam || base === CustomIds.DmModalServerName || base === CustomIds.DmModalServerIp) {
+  if (
+    base === CustomIds.DmModalSteam ||
+    base === CustomIds.DmModalServerName ||
+    base === CustomIds.DmModalServerIp
+  ) {
     return handleDmModals(interaction);
   }
 

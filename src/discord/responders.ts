@@ -1,12 +1,12 @@
 import {
   ChatInputCommandInteraction,
   InteractionReplyOptions,
-  InteractionResponse
+  InteractionResponse,
 } from "discord.js";
 
 export async function safeEphemeralReply(
   interaction: ChatInputCommandInteraction,
-  options: InteractionReplyOptions
+  options: InteractionReplyOptions,
 ): Promise<InteractionResponse | void> {
   try {
     if (interaction.deferred || interaction.replied) {

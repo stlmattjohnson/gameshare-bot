@@ -1,4 +1,8 @@
-import { ChannelType, ButtonInteraction, InteractionResponse } from "discord.js";
+import {
+  ChannelType,
+  ButtonInteraction,
+  InteractionResponse,
+} from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
 import { gameCatalog } from "../../catalog/catalog.ts";
@@ -21,10 +25,18 @@ export async function handleDmShareButtons(
   const game = gameCatalog.getById(gameId);
   const gameName = game?.name ?? "that game";
 
-  const share: any = { guildId, userId, gameId, gameName, detailKind: "NONE" } as any;
+  const share: any = {
+    guildId,
+    userId,
+    gameId,
+    gameName,
+    detailKind: "NONE",
+  } as any;
 
   if (base === CustomIds.DmShareNo) {
-    await dmShareFlowService.setInFlight(guildId, userId, gameId, false).catch(() => null);
+    await dmShareFlowService
+      .setInFlight(guildId, userId, gameId, false)
+      .catch(() => null);
     await interaction.message.edit({ components: [] }).catch(() => null);
     return true;
   }
@@ -38,32 +50,48 @@ export async function handleDmShareButtons(
   if (base === CustomIds.DmCancelPost) {
     await interaction.message.edit({ components: [] }).catch(() => null);
     dmShareFlowService.cacheDelete(guildId, userId, gameId);
-    await dmShareFlowService.setInFlight(guildId, userId, gameId, false).catch(() => null);
+    await dmShareFlowService
+      .setInFlight(guildId, userId, gameId, false)
+      .catch(() => null);
     return true;
   }
 
   if (base === CustomIds.DmConfirmPost) {
     const cached = dmShareFlowService.cacheGet(guildId, userId, gameId);
     if (!cached) {
-      await interaction.user.send("That share request expired. Please try again.").catch(() => null);
+      await interaction.user
+        .send("That share request expired. Please try again.")
+        .catch(() => null);
       return true;
     }
 
     const cfg = await guildConfigService.getOrCreate(guildId);
     if (!cfg.announceChannelId) {
-      await interaction.user.send("Sharing is unavailable because the server hasn’t configured an announce channel. Ask an admin to run `/gameshare admin set-channel`." ).catch(() => null);
+      await interaction.user
+        .send(
+          "Sharing is unavailable because the server hasn’t configured an announce channel. Ask an admin to run `/gameshare admin set-channel`.",
+        )
+        .catch(() => null);
       return true;
     }
 
     const guild = await resolveGuild(client, guildId);
     if (!guild) {
-      await interaction.user.send("I couldn’t find that server. Ask an admin to re-invite the bot.").catch(() => null);
+      await interaction.user
+        .send("I couldn’t find that server. Ask an admin to re-invite the bot.")
+        .catch(() => null);
       return true;
     }
 
-    const channel = await guild.channels.fetch(cfg.announceChannelId).catch(() => null);
+    const channel = await guild.channels
+      .fetch(cfg.announceChannelId)
+      .catch(() => null);
     if (!channel || channel.type !== ChannelType.GuildText) {
-      await interaction.user.send("Announce channel is missing or not a text channel. Ask an admin to re-set it.").catch(() => null);
+      await interaction.user
+        .send(
+          "Announce channel is missing or not a text channel. Ask an admin to re-set it.",
+        )
+        .catch(() => null);
       return true;
     }
 
@@ -79,11 +107,15 @@ export async function handleDmShareButtons(
             ? ` Join: ${cached.detailValue}`
             : ` Join: ${cached.detailValue}`;
 
-    await (channel as any).send(`${roleMention} <@${userId}> is playing **${cached.gameName}**.${detailPart}`.trim());
+    await (channel as any).send(
+      `${roleMention} <@${userId}> is playing **${cached.gameName}**.${detailPart}`.trim(),
+    );
 
     await interaction.message.edit({ components: [] }).catch(() => null);
     dmShareFlowService.cacheDelete(guildId, userId, gameId);
-    await dmShareFlowService.setInFlight(guildId, userId, gameId, false).catch(() => null);
+    await dmShareFlowService
+      .setInFlight(guildId, userId, gameId, false)
+      .catch(() => null);
 
     await interaction.user.send("✅ Posted!").catch(() => null);
     return true;

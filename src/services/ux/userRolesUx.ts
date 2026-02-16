@@ -4,7 +4,7 @@ import {
   ButtonStyle,
   EmbedBuilder,
   InteractionUpdateOptions,
-  StringSelectMenuBuilder
+  StringSelectMenuBuilder,
 } from "discord.js";
 import { CustomIds, PageSize, Limits } from "../../domain/constants.ts";
 import { guildConfigService } from "../guildConfigService.ts";
@@ -26,13 +26,16 @@ export function createUserRolesSession(state: UserRolesState): string {
 
 export async function renderUserRoles(
   sessionKey: string,
-  state: UserRolesState
+  state: UserRolesState,
 ): Promise<InteractionUpdateOptions> {
   const enabledIds = await guildConfigService.listEnabledGameIds(state.guildId);
-  const enabledGames = await catalogService.getAnyGamesByIds(state.guildId, enabledIds);
+  const enabledGames = await catalogService.getAnyGamesByIds(
+    state.guildId,
+    enabledIds,
+  );
 
   const selected = new Set(
-    await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId)
+    await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId),
   );
 
   const start = state.page * PageSize.UserGames;
@@ -45,8 +48,8 @@ export async function renderUserRoles(
         `Enabled games: **${enabledGames.length}**`,
         enabledGames.length === 0
           ? "Showing 0 of 0"
-          : `Showing ${start + 1}-${Math.min(start + pageItems.length, enabledGames.length)}`
-      ].join("\n")
+          : `Showing ${start + 1}-${Math.min(start + pageItems.length, enabledGames.length)}`,
+      ].join("\n"),
     );
 
   const components: any[] = [];
@@ -61,17 +64,20 @@ export async function renderUserRoles(
         pageItems.map((g) => ({
           label: g.name.slice(0, 100),
           value: g.id,
-          description: selected.has(g.id) ? "Selected" : "Not selected"
-        }))
+          description: selected.has(g.id) ? "Selected" : "Not selected",
+        })),
       );
 
-    components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select));
+    components.push(
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select),
+    );
   } else {
     embed.addFields([
       {
         name: "No enabled games",
-        value: "Ask an admin to enable games in `/gameshare admin configure-games`."
-      }
+        value:
+          "Ask an admin to enable games in `/gameshare admin configure-games`.",
+      },
     ]);
   }
 
@@ -89,7 +95,7 @@ export async function renderUserRoles(
     new ButtonBuilder()
       .setCustomId(`${CustomIds.UserRolesClearAll}|${sessionKey}`)
       .setLabel("Clear all my game roles")
-      .setStyle(ButtonStyle.Danger)
+      .setStyle(ButtonStyle.Danger),
   );
 
   components.push(rowButtons);

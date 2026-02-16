@@ -21,7 +21,11 @@ export const adminRequestApprovalService = {
   async approve(guild: Guild, guildId: string, requestId: number) {
     const pending = await gameAddRequestRepo.listPending(guildId);
     const req = pending.find((r) => r.id === requestId);
-    if (!req) return { ok: false as const, message: "Request not found (maybe already handled)." };
+    if (!req)
+      return {
+        ok: false as const,
+        message: "Request not found (maybe already handled).",
+      };
 
     // Create or reuse custom game entry (name = presenceName)
     const existing = await customGameRepo.findByName(guildId, req.presenceName);
@@ -49,24 +53,28 @@ export const adminRequestApprovalService = {
     try {
       const member = await guild.members.fetch(req.userId).catch(() => null);
       if (!member) {
-        requesterRoleAddMessage = "Requester not found in guild (maybe they left).";
+        requesterRoleAddMessage =
+          "Requester not found in guild (maybe they left).";
       } else {
         // Only try if bot can manage the role (hierarchy + perms)
         const can = await roleService.canManageRole(guild, role);
         if (!can.ok) {
-          requesterRoleAddMessage = can.reason ?? "Bot cannot manage the role (check role hierarchy).";
+          requesterRoleAddMessage =
+            can.reason ?? "Bot cannot manage the role (check role hierarchy).";
         } else if (member.roles.cache.has(role.id)) {
           requesterRoleAdded = true; // effectively already true
         } else {
           await member.roles.add(role).catch((e) => {
-            requesterRoleAddMessage = (e as Error)?.message ?? "Failed to add role.";
+            requesterRoleAddMessage =
+              (e as Error)?.message ?? "Failed to add role.";
           });
 
           if (!requesterRoleAddMessage) requesterRoleAdded = true;
         }
       }
     } catch (e) {
-      requesterRoleAddMessage = (e as Error)?.message ?? "Failed to add requester to role.";
+      requesterRoleAddMessage =
+        (e as Error)?.message ?? "Failed to add requester to role.";
     }
 
     return {
@@ -76,16 +84,20 @@ export const adminRequestApprovalService = {
       roleId: role.id,
       requesterUserId: req.userId,
       requesterRoleAdded,
-      requesterRoleAddMessage
+      requesterRoleAddMessage,
     };
   },
 
   async reject(guildId: string, requestId: number) {
     const pending = await gameAddRequestRepo.listPending(guildId);
     const req = pending.find((r) => r.id === requestId);
-    if (!req) return { ok: false as const, message: "Request not found (maybe already handled)." };
+    if (!req)
+      return {
+        ok: false as const,
+        message: "Request not found (maybe already handled).",
+      };
 
     await gameAddRequestRepo.setStatus(requestId, "REJECTED");
     return { ok: true as const, requesterUserId: req.userId };
-  }
+  },
 };

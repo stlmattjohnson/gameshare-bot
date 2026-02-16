@@ -4,7 +4,7 @@ import {
   ButtonStyle,
   EmbedBuilder,
   InteractionReplyOptions,
-  InteractionUpdateOptions
+  InteractionUpdateOptions,
 } from "discord.js";
 import { StateStore } from "./stateStore.ts";
 import { CustomIds } from "../../domain/constants.ts";
@@ -18,17 +18,23 @@ export type AdminRequestsState = {
 const PAGE_SIZE = 5;
 
 // 15-minute sessions like your other UIs
-export const adminRequestsUxStore = new StateStore<AdminRequestsState>(15 * 60_000);
+export const adminRequestsUxStore = new StateStore<AdminRequestsState>(
+  15 * 60_000,
+);
 
 export function createAdminRequestsSession(state: AdminRequestsState): string {
   return adminRequestsUxStore.put(state);
 }
 
-async function buildAdminRequestsView(sessionKey: string, state: AdminRequestsState) {
+async function buildAdminRequestsView(
+  sessionKey: string,
+  state: AdminRequestsState,
+) {
   const all = await gameAddRequestRepo.listPending(state.guildId);
   const total = all.length;
 
-  const maxPage = total === 0 ? 0 : Math.max(0, Math.floor((total - 1) / PAGE_SIZE));
+  const maxPage =
+    total === 0 ? 0 : Math.max(0, Math.floor((total - 1) / PAGE_SIZE));
   const page = Math.min(Math.max(state.page, 0), maxPage);
 
   const start = page * PAGE_SIZE;
@@ -39,7 +45,7 @@ async function buildAdminRequestsView(sessionKey: string, state: AdminRequestsSt
     .setDescription(
       total === 0
         ? "No pending requests."
-        : `Showing ${start + 1}-${Math.min(start + pageItems.length, total)} of ${total}`
+        : `Showing ${start + 1}-${Math.min(start + pageItems.length, total)} of ${total}`,
     );
 
   if (pageItems.length > 0) {
@@ -48,9 +54,9 @@ async function buildAdminRequestsView(sessionKey: string, state: AdminRequestsSt
         {
           name: `#${req.id} — ${req.presenceName}`,
           value: `Requested by <@${req.userId}>\nCreated: <t:${Math.floor(
-            req.createdAt.getTime() / 1000
-          )}:R>`
-        }
+            req.createdAt.getTime() / 1000,
+          )}:R>`,
+        },
       ]);
     }
   }
@@ -69,26 +75,28 @@ async function buildAdminRequestsView(sessionKey: string, state: AdminRequestsSt
     new ButtonBuilder()
       .setCustomId(`${CustomIds.AdminRequestsDone}|${sessionKey}`)
       .setLabel("Done")
-      .setStyle(ButtonStyle.Primary)
+      .setStyle(ButtonStyle.Primary),
   );
 
   // One row per request with approve/reject buttons
   const decisionRows = pageItems.map((req) =>
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setCustomId(`${CustomIds.AdminRequestsApprove}|${sessionKey}|${req.id}`)
+        .setCustomId(
+          `${CustomIds.AdminRequestsApprove}|${sessionKey}|${req.id}`,
+        )
         .setLabel(`Approve: ${req.presenceName}`)
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`${CustomIds.AdminRequestsReject}|${sessionKey}|${req.id}`)
         .setLabel(`Reject: ${req.presenceName}`)
-        .setStyle(ButtonStyle.Danger)
-    )
+        .setStyle(ButtonStyle.Danger),
+    ),
   );
 
   return {
     embeds: [embed],
-    components: [navRow, ...decisionRows]
+    components: [navRow, ...decisionRows],
   };
 }
 
@@ -97,7 +105,7 @@ async function buildAdminRequestsView(sessionKey: string, state: AdminRequestsSt
  */
 export async function renderAdminRequests(
   sessionKey: string,
-  state: AdminRequestsState
+  state: AdminRequestsState,
 ): Promise<InteractionReplyOptions> {
   const view = await buildAdminRequestsView(sessionKey, state);
   return { ...view, ephemeral: true };
@@ -109,7 +117,7 @@ export async function renderAdminRequests(
  */
 export async function renderAdminRequestsUpdate(
   sessionKey: string,
-  state: AdminRequestsState
+  state: AdminRequestsState,
 ): Promise<InteractionUpdateOptions> {
   return buildAdminRequestsView(sessionKey, state);
 }

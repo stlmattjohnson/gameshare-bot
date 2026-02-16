@@ -7,7 +7,7 @@ import {
   StringSelectMenuBuilder,
   TextInputBuilder,
   TextInputStyle,
-  InteractionUpdateOptions
+  InteractionUpdateOptions,
 } from "discord.js";
 import { CustomIds, PageSize, Limits } from "../../domain/constants.ts";
 import { guildConfigService } from "../guildConfigService.ts";
@@ -29,13 +29,15 @@ export function createAdminSession(state: AdminUxState): string {
 
 export async function renderAdminConfigure(
   sessionKey: string,
-  state: AdminUxState
+  state: AdminUxState,
 ): Promise<InteractionUpdateOptions> {
   const results = await catalogService.searchAll(state.guildId, state.query);
   const start = state.page * PageSize.AdminGames;
   const pageItems = results.slice(start, start + PageSize.AdminGames);
 
-  const enabledIds = new Set(await guildConfigService.listEnabledGameIds(state.guildId));
+  const enabledIds = new Set(
+    await guildConfigService.listEnabledGameIds(state.guildId),
+  );
 
   const embed = new EmbedBuilder()
     .setTitle("Configure Games")
@@ -46,8 +48,8 @@ export async function renderAdminConfigure(
           ? "Showing 0 of 0"
           : `Showing ${start + 1}-${Math.min(start + pageItems.length, results.length)} of ${results.length}`,
         "",
-        "Select games below to enable/disable."
-      ].join("\n")
+        "Select games below to enable/disable.",
+      ].join("\n"),
     );
 
   const components: any[] = [];
@@ -62,13 +64,17 @@ export async function renderAdminConfigure(
         pageItems.map((g) => ({
           label: g.name.slice(0, 100),
           value: g.id,
-          description: `${enabledIds.has(g.id) ? "Enabled" : "Disabled"}${g.kind === "CUSTOM" ? " • Custom" : ""}`
-        }))
+          description: `${enabledIds.has(g.id) ? "Enabled" : "Disabled"}${g.kind === "CUSTOM" ? " • Custom" : ""}`,
+        })),
       );
 
-    components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select));
+    components.push(
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select),
+    );
   } else {
-    embed.addFields([{ name: "No results", value: "Try a different search term." }]);
+    embed.addFields([
+      { name: "No results", value: "Try a different search term." },
+    ]);
   }
 
   const rowButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -89,20 +95,28 @@ export async function renderAdminConfigure(
     new ButtonBuilder()
       .setCustomId(`${CustomIds.AdminConfigureDone}|${sessionKey}`)
       .setLabel("Done")
-      .setStyle(ButtonStyle.Primary)
+      .setStyle(ButtonStyle.Primary),
   );
 
   const cfg = await guildConfigService.getOrCreate(state.guildId);
 
   const rowDeleteOpt = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId(`${CustomIds.AdminConfigureDeleteRolesToggle}|${state.guildId}`)
-      .setLabel(`Delete roles for disabled games: ${cfg.deleteDisabledRoles ? "ON" : "OFF"}`)
-      .setStyle(cfg.deleteDisabledRoles ? ButtonStyle.Success : ButtonStyle.Secondary),
+      .setCustomId(
+        `${CustomIds.AdminConfigureDeleteRolesToggle}|${state.guildId}`,
+      )
+      .setLabel(
+        `Delete roles for disabled games: ${cfg.deleteDisabledRoles ? "ON" : "OFF"}`,
+      )
+      .setStyle(
+        cfg.deleteDisabledRoles ? ButtonStyle.Success : ButtonStyle.Secondary,
+      ),
     new ButtonBuilder()
-      .setCustomId(`${CustomIds.AdminConfigureDeleteRolesConfirm}|${state.guildId}`)
+      .setCustomId(
+        `${CustomIds.AdminConfigureDeleteRolesConfirm}|${state.guildId}`,
+      )
       .setLabel("Delete disabled roles NOW…")
-      .setStyle(ButtonStyle.Danger)
+      .setStyle(ButtonStyle.Danger),
   );
 
   components.push(rowButtons, rowDeleteOpt);
@@ -122,6 +136,8 @@ export function buildAdminSearchModal(sessionKey: string) {
     .setMaxLength(50)
     .setPlaceholder("e.g., helldivers");
 
-  modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(input));
+  modal.addComponents(
+    new ActionRowBuilder<TextInputBuilder>().addComponents(input),
+  );
   return modal;
 }

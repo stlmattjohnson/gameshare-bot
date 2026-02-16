@@ -10,7 +10,7 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
   DEBUG_MODE: z.string().optional(),
   PROMPT_COOLDOWN_MINUTES: z.string().optional(),
-  ROLE_PREFIX: z.string().optional()
+  ROLE_PREFIX: z.string().optional(),
 });
 
 const env = EnvSchema.parse(process.env);
@@ -23,5 +23,5 @@ export const config = {
   debugMode: (env.DEBUG_MODE ?? "false").toLowerCase() === "true",
   //promptCooldownMinutes: Number(env.PROMPT_COOLDOWN_MINUTES ?? "30"),
   promptCooldownMinutes: 0,
-  rolePrefix: env.ROLE_PREFIX ?? "Playing: "
+  rolePrefix: env.ROLE_PREFIX ?? "Playing: ",
 };

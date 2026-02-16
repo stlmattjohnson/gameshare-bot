@@ -13,5 +13,5 @@ export const guildConfigService = {
   isEnabled: enabledGameRepo.isEnabled,
   getRoleId: gameRoleMapRepo.getRoleId,
   setRoleId: gameRoleMapRepo.setRoleId,
-  listMappings: gameRoleMapRepo.listMappings
+  listMappings: gameRoleMapRepo.listMappings,
 };

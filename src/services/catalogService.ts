@@ -9,9 +9,14 @@ export type AnyGame = {
 };
 
 export const catalogService = {
-  async matchPresence(guildId: string, presenceName: string): Promise<AnyGame | null> {
-    const staticMatch = gameCatalog.matchPresenceGameNameToCatalog(presenceName);
-    if (staticMatch) return { id: staticMatch.id, name: staticMatch.name, kind: "STATIC" };
+  async matchPresence(
+    guildId: string,
+    presenceName: string,
+  ): Promise<AnyGame | null> {
+    const staticMatch =
+      gameCatalog.matchPresenceGameNameToCatalog(presenceName);
+    if (staticMatch)
+      return { id: staticMatch.id, name: staticMatch.name, kind: "STATIC" };
 
     const norm = normalizeName(presenceName);
     const customs = await customGameRepo.list(guildId);
@@ -32,16 +37,25 @@ export const catalogService = {
     const q = normalizeName(query);
     const customsRaw = await customGameRepo.list(guildId);
     const customs = customsRaw
-      .filter((c) => !q || normalizeName(c.name).includes(q) || (c.presenceName && normalizeName(c.presenceName).includes(q)))
+      .filter(
+        (c) =>
+          !q ||
+          normalizeName(c.name).includes(q) ||
+          (c.presenceName && normalizeName(c.presenceName).includes(q)),
+      )
       .map((c) => ({ id: c.id, name: c.name, kind: "CUSTOM" as const }));
 
     // Put custom games first so they're easy to find
     return [...customs, ...statics];
   },
 
-  async getAnyGameById(guildId: string, gameId: string): Promise<AnyGame | null> {
+  async getAnyGameById(
+    guildId: string,
+    gameId: string,
+  ): Promise<AnyGame | null> {
     const staticGame = gameCatalog.getById(gameId);
-    if (staticGame) return { id: staticGame.id, name: staticGame.name, kind: "STATIC" };
+    if (staticGame)
+      return { id: staticGame.id, name: staticGame.name, kind: "STATIC" };
 
     const custom = await customGameRepo.findById(guildId, gameId);
     if (custom) return { id: custom.id, name: custom.name, kind: "CUSTOM" };
@@ -63,7 +77,10 @@ export const catalogService = {
     }
 
     // 2) customs
-    const customNameMap = await customGameRepo.getNamesByIds(guildId, customIds);
+    const customNameMap = await customGameRepo.getNamesByIds(
+      guildId,
+      customIds,
+    );
     const customGames: AnyGame[] = customIds
       .map((id) => {
         const name = customNameMap.get(id);
@@ -72,7 +89,9 @@ export const catalogService = {
       .filter(Boolean) as AnyGame[];
 
     // preserve original order of ids
-    const all = new Map<string, AnyGame>([...staticGames, ...customGames].map((g) => [g.id, g]));
+    const all = new Map<string, AnyGame>(
+      [...staticGames, ...customGames].map((g) => [g.id, g]),
+    );
     return ids.map((id) => all.get(id)).filter(Boolean) as AnyGame[];
-  }
+  },
 };

@@ -1,11 +1,19 @@
 import { prisma } from "../prisma.js";
 
 export const userDataRepo = {
-  async upsertDetails(guildId: string, userId: string, patch: { steamId?: string | null; serverName?: string | null; serverIp?: string | null }) {
+  async upsertDetails(
+    guildId: string,
+    userId: string,
+    patch: {
+      steamId?: string | null;
+      serverName?: string | null;
+      serverIp?: string | null;
+    },
+  ) {
     await prisma.userSharedDetails.upsert({
       where: { guildId_userId: { guildId, userId } },
       update: patch,
-      create: { guildId, userId, ...patch }
+      create: { guildId, userId, ...patch },
     });
   },
 
@@ -15,7 +23,7 @@ export const userDataRepo = {
       prisma.userGameRolePref.deleteMany({ where: { guildId, userId } }),
       prisma.promptCooldown.deleteMany({ where: { guildId, userId } }),
       prisma.shareRequestState.deleteMany({ where: { guildId, userId } }),
-      prisma.userOptIn.deleteMany({ where: { guildId, userId } })
+      prisma.userOptIn.deleteMany({ where: { guildId, userId } }),
     ]);
-  }
+  },
 };

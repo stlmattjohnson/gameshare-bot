@@ -8,7 +8,7 @@ export const enabledGameRepo = {
 
   async isEnabled(guildId: string, gameId: string) {
     const row = await prisma.enabledGame.findUnique({
-      where: { guildId_gameId: { guildId, gameId } }
+      where: { guildId_gameId: { guildId, gameId } },
     });
     return !!row;
   },
@@ -17,11 +17,11 @@ export const enabledGameRepo = {
     await prisma.enabledGame.upsert({
       where: { guildId_gameId: { guildId, gameId } },
       update: {},
-      create: { guildId, gameId }
+      create: { guildId, gameId },
     });
   },
 
   async disable(guildId: string, gameId: string) {
     await prisma.enabledGame.deleteMany({ where: { guildId, gameId } });
-  }
+  },
 };
