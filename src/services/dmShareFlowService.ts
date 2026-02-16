@@ -16,7 +16,7 @@ import { config } from "../config.ts";
 import { cooldownRepo } from "../db/repositories/cooldownRepo.ts";
 import { guildConfigService } from "./guildConfigService.ts";
 import { prisma } from "../db/prisma.ts";
-import { PendingShare, DetailKind } from "../domain/types.ts";
+import { Share, DetailKind } from "../domain/types.ts";
 import { userDataRepo } from "../db/repositories/userDataRepo.ts";
 
 const now = () => {
@@ -27,19 +27,15 @@ const minutesAgo = (d: Date, minutes: number) => {
   return new Date(d.getTime() + minutes * 60_000);
 };
 
-const pendingShareCache = new Map<string, PendingShare>();
-const cacheKey = (s: PendingShare) => `${s.guildId}:${s.userId}:${s.gameId}`;
+const pendingShareCache = new Map<string, Share>();
+const cacheKey = (s: Share) => `${s.guildId}:${s.userId}:${s.gameId}`;
 
 export const dmShareFlowService = {
-  cachePut(share: PendingShare) {
+  cachePut(share: Share) {
     pendingShareCache.set(cacheKey(share), share);
   },
 
-  cacheGet(
-    guildId: string,
-    userId: string,
-    gameId: string,
-  ): PendingShare | null {
+  cacheGet(guildId: string, userId: string, gameId: string): Share | null {
     return pendingShareCache.get(`${guildId}:${userId}:${gameId}`) ?? null;
   },
 
@@ -92,7 +88,7 @@ export const dmShareFlowService = {
     return row?.status === "IN_FLIGHT";
   },
 
-  async sendInitialDm(user: User, share: PendingShare) {
+  async sendInitialDm(user: User, share: Share) {
     console.log({ user, share });
     const embed = new EmbedBuilder()
       .setTitle("Share your game?")
@@ -127,7 +123,7 @@ export const dmShareFlowService = {
     }
   },
 
-  async sendDetailPickerDm(user: User, share: PendingShare) {
+  async sendDetailPickerDm(user: User, share: Share) {
     const embed = new EmbedBuilder()
       .setTitle("What detail do you want to share?")
       .setDescription("Pick one option. You'll see a preview before posting.");
@@ -156,7 +152,7 @@ export const dmShareFlowService = {
     await user.send({ embeds: [embed], components: [row] });
   },
 
-  buildModal(detail: DetailKind, share: PendingShare) {
+  buildModal(detail: DetailKind, share: Share) {
     const modalId =
       detail === "STEAM"
         ? CustomIds.DmModalSteam
@@ -227,7 +223,7 @@ export const dmShareFlowService = {
     return { ok: true };
   },
 
-  async sendPreviewDm(user: User, share: PendingShare) {
+  async sendPreviewDm(user: User, share: Share) {
     const detailLine =
       share.detailKind === "NONE"
         ? ""
@@ -263,7 +259,7 @@ export const dmShareFlowService = {
     await user.send({ embeds: [embed], components: [row] });
   },
 
-  async postToAnnounceChannel(share: PendingShare) {
+  async postToAnnounceChannel(share: Share) {
     const cfg = await guildConfigService.getOrCreate(share.guildId);
     if (!cfg.announceChannelId) {
       throw new Error("Announce channel is not configured.");
@@ -294,7 +290,7 @@ export const dmShareFlowService = {
       });
   },
 
-  dmId(base: string, share: PendingShare) {
+  dmId(base: string, share: Share) {
     // Encode state into customId (within 100 chars): base|guild|user|game
     return `${base}|${share.guildId}|${share.userId}|${share.gameId}`.slice(
       0,

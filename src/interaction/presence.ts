@@ -1,4 +1,4 @@
-import { Presence } from "discord.js";
+import { Client, Presence } from "discord.js";
 import { optInService } from "../services/optInService.ts";
 import { extractPlayingName } from "../services/gameDetectionService.ts";
 import { catalogService } from "../services/catalogService.ts";
@@ -7,7 +7,7 @@ import { unknownGameRequestService } from "../services/unknownGameRequestService
 import { logger } from "../logger.ts";
 import { guildConfigService } from "../services/guildConfigService.ts";
 
-export const registerPresenceHandler = (client: any) => {
+export const registerPresenceHandler = (client: Client) => {
   client.on(
     "presenceUpdate",
     async (oldPresence: Presence | null, newPresence: Presence) => {

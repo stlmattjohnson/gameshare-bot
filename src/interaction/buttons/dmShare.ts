@@ -2,15 +2,17 @@ import {
   ChannelType,
   ButtonInteraction,
   InteractionResponse,
+  Client,
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
 import { catalogService } from "../../services/catalogService.ts";
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { resolveGuild } from "../utils.ts";
+import { Share } from "../../domain/types.ts";
 
 export const handleDmShareButtons = async (
-  client: any,
+  client: Client,
   interaction: ButtonInteraction,
   base: string,
 ): Promise<boolean | InteractionResponse<boolean>> => {
@@ -23,13 +25,13 @@ export const handleDmShareButtons = async (
   const game = await catalogService.getAnyGameById(guildId, gameId);
   const gameName = game?.name ?? "that game";
 
-  const share: any = {
+  const share: Share = {
     guildId,
     userId,
     gameId,
     gameName,
     detailKind: "NONE",
-  } as any;
+  };
 
   if (base === CustomIds.DmShareNo) {
     await dmShareFlowService
@@ -105,7 +107,7 @@ export const handleDmShareButtons = async (
             ? ` Join: ${cached.detailValue}`
             : ` Join: ${cached.detailValue}`;
 
-    await (channel as any).send(
+    await channel.send(
       `${roleMention} <@${userId}> is playing **${cached.gameName}**.${detailPart}`.trim(),
     );
 

@@ -52,7 +52,9 @@ export const renderUserRoles = async (
       ].join("\n"),
     );
 
-  const components: any[] = [];
+  const components: ActionRowBuilder<
+    StringSelectMenuBuilder | ButtonBuilder
+  >[] = [];
 
   if (pageItems.length > 0) {
     const select = new StringSelectMenuBuilder()

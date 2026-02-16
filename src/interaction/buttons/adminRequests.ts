@@ -2,6 +2,7 @@ import {
   PermissionFlagsBits,
   ButtonInteraction,
   InteractionResponse,
+  Client,
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import {
@@ -13,7 +14,7 @@ import { adminRequestApprovalService } from "../../services/adminRequestApproval
 import { expiredMessage, resolveGuild } from "../utils.ts";
 
 export const handleAdminRequests = async (
-  client: any,
+  client: Client,
   interaction: ButtonInteraction,
   base: string,
   key: string | null,
@@ -42,10 +43,9 @@ export const handleAdminRequests = async (
     }));
     if (!next)
       return interaction.reply(expiredMessage("/gameshare admin requests"));
-    const ui = await renderAdminRequests(key, next);
-    const { ephemeral, ...updateOptions } = ui as any;
+    const ui = await renderAdminRequestsUpdate(key, next);
     return interaction
-      .update(updateOptions)
+      .update(ui)
       .then(() => true)
       .catch(() => true);
   }
@@ -58,10 +58,9 @@ export const handleAdminRequests = async (
     }));
     if (!next)
       return interaction.reply(expiredMessage("/gameshare admin requests"));
-    const ui = await renderAdminRequests(key, next);
-    const { ephemeral, ...updateOptions } = ui as any;
+    const ui = await renderAdminRequestsUpdate(key, next);
     return interaction
-      .update(updateOptions)
+      .update(ui)
       .then(() => true)
       .catch(() => true);
   }

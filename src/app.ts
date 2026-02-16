@@ -1,4 +1,4 @@
-import { Interaction } from "discord.js";
+import { Client, Interaction } from "discord.js";
 import { logger } from "./logger.ts";
 import { handleGameshare } from "./commands/gameshare.ts";
 
@@ -7,7 +7,7 @@ import { handleButtonInteraction } from "./interaction/buttons/index.ts";
 import { handleSelectInteraction } from "./interaction/selects/index.ts";
 import { handleModalInteraction } from "./interaction/modals/index.ts";
 
-export function registerAppHandlers(client: any) {
+export function registerAppHandlers(client: Client) {
   client.on("interactionCreate", async (interaction: Interaction) => {
     try {
       // Slash commands

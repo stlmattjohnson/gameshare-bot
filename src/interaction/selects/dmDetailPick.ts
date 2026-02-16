@@ -7,6 +7,7 @@ import {
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
 import { catalogService } from "../../services/catalogService.ts";
+import { DetailKind, Share } from "../../domain/types.ts";
 
 export const handleDmDetailPick = async (
   interaction: StringSelectMenuInteraction,
@@ -23,8 +24,8 @@ export const handleDmDetailPick = async (
   const game = await catalogService.getAnyGameById(guildId, gameId);
   const gameName = game?.name ?? "that game";
 
-  const detailKind = (interaction.values[0] ?? "NONE") as any;
-  const share: any = { guildId, userId, gameId, gameName, detailKind };
+  const detailKind = (interaction.values[0] ?? "NONE") as DetailKind;
+  const share: Share = { guildId, userId, gameId, gameName, detailKind };
 
   if (detailKind === "NONE") {
     dmShareFlowService.cachePut(share);

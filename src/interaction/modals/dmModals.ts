@@ -8,6 +8,7 @@ import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
 import { catalogService } from "../../services/catalogService.ts";
 import { parseSessionCustomId } from "../utils.ts";
+import { DetailKind, Share } from "../../domain/types.ts";
 
 export const handleDmModals = async (
   interaction: ModalSubmitInteraction,
@@ -31,7 +32,7 @@ export const handleDmModals = async (
     const game = await catalogService.getAnyGameById(guildId, gameId);
     const gameName = game?.name ?? "that game";
 
-    const detailKind: any =
+    const detailKind: DetailKind =
       base === CustomIds.DmModalSteam
         ? "STEAM"
         : base === CustomIds.DmModalServerName
@@ -51,7 +52,7 @@ export const handleDmModals = async (
         .catch(() => true);
     }
 
-    const share: any = {
+    const share: Share = {
       guildId,
       userId,
       gameId,

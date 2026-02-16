@@ -1,4 +1,4 @@
-import { Guild } from "discord.js";
+import { Client, Guild } from "discord.js";
 
 export const expiredMessage = (cmd: string) => {
   return {
@@ -29,7 +29,7 @@ export const b64urlDecode = (s: string) => {
 };
 
 export const resolveGuild = async (
-  client: any,
+  client: Client,
   guildId: string,
 ): Promise<Guild | null> => {
   const cached = client.guilds.cache.get(guildId) as Guild | undefined;

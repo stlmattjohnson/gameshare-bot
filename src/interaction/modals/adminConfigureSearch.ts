@@ -36,7 +36,7 @@ export const handleAdminConfigureSearch = async (
 
     const ui = await renderAdminConfigure(key, next);
     return interaction
-      .reply({ ...(ui as any), ephemeral: true })
+      .reply(ui)
       .then(() => true)
       .catch(() => true);
   }

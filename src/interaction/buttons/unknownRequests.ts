@@ -2,6 +2,7 @@ import {
   ChannelType,
   ButtonInteraction,
   InteractionResponse,
+  Client,
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { unknownGameRequestService } from "../../services/unknownGameRequestService.ts";
@@ -9,7 +10,7 @@ import { guildConfigService } from "../../services/guildConfigService.ts";
 import { resolveGuild } from "../utils.ts";
 
 export const handleUnknownRequests = async (
-  client: any,
+  client: Client,
   interaction: ButtonInteraction,
   base: string,
   key: string | null,
@@ -76,7 +77,7 @@ export const handleUnknownRequests = async (
     return true;
   }
 
-  await (ch as any).send(
+  await ch.send(
     [
       `🆕 **Game Add Request**`,
       `Requested by: <@${interaction.user.id}>`,

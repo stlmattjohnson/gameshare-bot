@@ -7,7 +7,7 @@ import {
   StringSelectMenuBuilder,
   TextInputBuilder,
   TextInputStyle,
-  InteractionUpdateOptions,
+  InteractionReplyOptions,
 } from "discord.js";
 import { CustomIds, PageSize, Limits } from "../../domain/constants.ts";
 import { guildConfigService } from "../guildConfigService.ts";
@@ -30,7 +30,7 @@ export const createAdminSession = (state: AdminUxState): string => {
 export const renderAdminConfigure = async (
   sessionKey: string,
   state: AdminUxState,
-): Promise<InteractionUpdateOptions> => {
+): Promise<InteractionReplyOptions> => {
   const results = await catalogService.searchAll(state.guildId, state.query);
   const start = state.page * PageSize.AdminGames;
   const pageItems = results.slice(start, start + PageSize.AdminGames);
@@ -52,7 +52,9 @@ export const renderAdminConfigure = async (
       ].join("\n"),
     );
 
-  const components: any[] = [];
+  const components: ActionRowBuilder<
+    StringSelectMenuBuilder | ButtonBuilder
+  >[] = [];
 
   if (pageItems.length > 0) {
     const select = new StringSelectMenuBuilder()

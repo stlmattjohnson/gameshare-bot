@@ -1,6 +1,6 @@
 export type DetailKind = "NONE" | "STEAM" | "SERVER_NAME" | "SERVER_IP";
 
-export type PendingShare = {
+export type Share = {
   guildId: string;
   userId: string;
   gameId: string;

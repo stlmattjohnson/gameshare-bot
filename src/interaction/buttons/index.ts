@@ -1,4 +1,4 @@
-import { ButtonInteraction, InteractionResponse } from "discord.js";
+import { ButtonInteraction, Client, InteractionResponse } from "discord.js";
 import { parseSessionCustomId } from "../utils.ts";
 import { CustomIds } from "../../domain/constants.ts";
 import { handleAdminRequests } from "./adminRequests.ts";
@@ -7,7 +7,7 @@ import { handleDmShareButtons } from "./dmShare.ts";
 import { handleAdminConfigureButtons } from "./adminConfigure.ts";
 
 export async function handleButtonInteraction(
-  client: any,
+  client: Client,
   interaction: ButtonInteraction,
 ): Promise<boolean | InteractionResponse<boolean>> {
   const {

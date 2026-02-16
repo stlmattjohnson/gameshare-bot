@@ -44,14 +44,6 @@ export const gameshareCommand = new SlashCommandBuilder()
       )
       .addSubcommand((s) =>
         s
-          .setName("configure-games")
-          .setDescription("Enable/disable recognized games"),
-      )
-      .addSubcommand((s) =>
-        s.setName("status").setDescription("Show config + health status"),
-      )
-      .addSubcommand((s) =>
-        s
           .setName("set-request-channel")
           .setDescription(
             "Set the channel where unknown-game add requests are posted",
@@ -64,6 +56,15 @@ export const gameshareCommand = new SlashCommandBuilder()
               .addChannelTypes(ChannelType.GuildText),
           ),
       )
+      .addSubcommand((s) =>
+        s
+          .setName("configure-games")
+          .setDescription("Enable/disable recognized games"),
+      )
+      .addSubcommand((s) =>
+        s.setName("status").setDescription("Show config + health status"),
+      )
+
       .addSubcommand((s) =>
         s
           .setName("requests")
@@ -145,10 +146,7 @@ export const handleGameshare = async (
       const state = { guildId: interaction.guildId, query: "", page: 0 };
       const key = createAdminSession(state);
       const ui = await renderAdminConfigure(key, state);
-      return safeEphemeralReply(interaction, {
-        ...(ui as any),
-        ephemeral: true,
-      });
+      return safeEphemeralReply(interaction, ui);
     }
 
     if (sub === "status") {
