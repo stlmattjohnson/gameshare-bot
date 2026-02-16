@@ -149,3 +149,14 @@ model UserSharedDetails {
   @@unique([guildId, userId])
   @@index([guildId, userId])
 }
+
+model PostedMessage {
+  messageId  String   @id
+  guildId    String
+  gameId     String
+  roleId     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([guildId])
+}

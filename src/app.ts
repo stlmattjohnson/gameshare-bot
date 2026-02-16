@@ -6,6 +6,7 @@ import { registerPresenceHandler } from "./interaction/presence.ts";
 import { handleButtonInteraction } from "./interaction/buttons/index.ts";
 import { handleSelectInteraction } from "./interaction/selects/index.ts";
 import { handleModalInteraction } from "./interaction/modals/index.ts";
+import { registerReactionHandlers } from "./discord/reactions.ts";
 
 export function registerAppHandlers(client: Client) {
   client.on("interactionCreate", async (interaction: Interaction) => {
@@ -51,4 +52,6 @@ export function registerAppHandlers(client: Client) {
 
   // Register presence update handler
   registerPresenceHandler(client);
+  // Register reaction-based role handlers
+  registerReactionHandlers(client);
 }

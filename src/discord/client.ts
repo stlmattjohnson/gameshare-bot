@@ -7,10 +7,15 @@ export const createDiscordClient = () => {
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildPresences,
       GatewayIntentBits.DirectMessages,
-      // Note: GuildMembers is not strictly required if we only add/remove roles on known GuildMember from interactions.
-      // If you later need to fetch members by ID, add GatewayIntentBits.GuildMembers.
+      GatewayIntentBits.GuildMessageReactions,
+      GatewayIntentBits.GuildMembers,
     ],
-    partials: [Partials.Channel], // needed for DMs
+    partials: [
+      Partials.Channel,
+      Partials.Message,
+      Partials.Reaction,
+      Partials.User,
+    ],
   });
 
   client.on("error", (err) => logger.error({ err }, "Discord client error"));

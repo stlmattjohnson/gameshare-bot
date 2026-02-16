@@ -3,6 +3,7 @@ import {
   ButtonInteraction,
   InteractionResponse,
   Client,
+  EmbedBuilder,
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
@@ -98,18 +99,56 @@ export const handleDmShareButtons = async (
     const roleId = await guildConfigService.getRoleId(guildId, gameId);
     const roleMention = roleId ? `<@&${roleId}>` : "";
 
-    const detailPart =
+    const detailText =
       cached.detailKind === "NONE"
         ? ""
         : cached.detailKind === "STEAM"
-          ? ` Join: Steam ID ${cached.detailValue}`
+          ? `Steam ID: ${cached.detailValue}`
           : cached.detailKind === "SERVER_NAME"
-            ? ` Join: ${cached.detailValue}`
-            : ` Join: ${cached.detailValue}`;
+            ? `Server Name: ${cached.detailValue}`
+            : `Server IP: ${cached.detailValue}`;
 
-    await channel.send(
-      `${roleMention} <@${userId}> is playing **${cached.gameName}**.${detailPart}`.trim(),
-    );
+    const embed = new EmbedBuilder()
+      .setTitle(`🎮 **${gameName}**`)
+      .setDescription(
+        [
+          `<@${userId}> is playing **${cached.gameName}**`,
+          detailText || undefined,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      )
+      .setFooter({
+        text: roleId
+          ? "Want to change your notifications for this game? React ➕ to add the role, or ➖ to remove it."
+          : "",
+      });
+
+    const sent = await channel
+      .send({
+        content: roleId ? roleMention : undefined,
+        embeds: [embed],
+        allowedMentions: roleId ? { roles: [roleId] } : undefined,
+      })
+      .catch(() => null);
+
+    if (sent && roleId) {
+      // Add reactions for users to opt-in / opt-out
+      try {
+        await sent.react("➕");
+        await sent.react("➖");
+      } catch {
+        // ignore reaction failures
+      }
+
+      // Remember mapping from message -> guild/game for reaction handlers
+      await dmShareFlowService.registerPostedMessage(
+        sent.id,
+        guildId,
+        gameId,
+        roleId,
+      );
+    }
 
     await interaction.message.edit({ components: [] }).catch(() => null);
     dmShareFlowService.cacheDelete(guildId, userId, gameId);

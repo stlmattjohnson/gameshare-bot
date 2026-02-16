@@ -30,6 +30,9 @@ const minutesAgo = (d: Date, minutes: number) => {
 const pendingShareCache = new Map<string, Share>();
 const cacheKey = (s: Share) => `${s.guildId}:${s.userId}:${s.gameId}`;
 
+// Persist posted announce messages so reaction handlers can map message -> role/game
+type PostedMapping = { guildId: string; gameId: string; roleId?: string };
+
 export const dmShareFlowService = {
   cachePut(share: Share) {
     pendingShareCache.set(cacheKey(share), share);
@@ -89,7 +92,6 @@ export const dmShareFlowService = {
   },
 
   async sendInitialDm(user: User, share: Share) {
-    console.log({ user, share });
     const embed = new EmbedBuilder()
       .setTitle("Share your game?")
       .setDescription(
@@ -296,6 +298,35 @@ export const dmShareFlowService = {
       0,
       100,
     );
+  },
+
+  async registerPostedMessage(
+    messageId: string,
+    guildId: string,
+    gameId: string,
+    roleId?: string,
+  ) {
+    await prisma.postedMessage.upsert({
+      where: { messageId },
+      update: { guildId, gameId, roleId },
+      create: { messageId, guildId, gameId, roleId },
+    });
+  },
+
+  async getPostedMessage(messageId: string): Promise<PostedMapping | null> {
+    const row = await prisma.postedMessage.findUnique({ where: { messageId } });
+    if (!row) return null;
+    return {
+      guildId: row.guildId,
+      gameId: row.gameId,
+      roleId: row.roleId ?? undefined,
+    };
+  },
+
+  async unregisterPostedMessage(messageId: string) {
+    await prisma.postedMessage
+      .delete({ where: { messageId } })
+      .catch(() => null);
   },
 
   parseDmId(
