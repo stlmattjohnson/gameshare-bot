@@ -10,7 +10,7 @@ async function main() {
   const client = createDiscordClient();
   registerAppHandlers(client);
 
-  client.once("ready", () => {
+  client.once('clientReady', () => {
     logger.info({ user: client.user?.tag }, "Bot ready");
     logger.info("If game detection fails, ensure Presence Intent is enabled in the Developer Portal.");
   });

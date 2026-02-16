@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "node build/esbuild.mjs",
     "start": "node dist/index.js",
     "lint": "eslint .",
     "format": "prettier -w .",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
+    "esbuild": "^0.19.0",
     "eslint": "^9.7.0",
     "prettier": "^3.3.3",
     "prisma": "^5.19.1",
