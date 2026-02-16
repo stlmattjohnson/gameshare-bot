@@ -20,14 +20,14 @@ export type UserRolesState = {
 
 export const userRolesUxStore = new StateStore<UserRolesState>(15 * 60_000);
 
-export function createUserRolesSession(state: UserRolesState): string {
+export const createUserRolesSession = (state: UserRolesState): string => {
   return userRolesUxStore.put(state);
-}
+};
 
-export async function renderUserRoles(
+export const renderUserRoles = async (
   sessionKey: string,
   state: UserRolesState,
-): Promise<InteractionUpdateOptions> {
+): Promise<InteractionUpdateOptions> => {
   const enabledIds = await guildConfigService.listEnabledGameIds(state.guildId);
   const enabledGames = await catalogService.getAnyGamesByIds(
     state.guildId,
@@ -100,4 +100,4 @@ export async function renderUserRoles(
 
   components.push(rowButtons);
   return { embeds: [embed], components };
-}
+};

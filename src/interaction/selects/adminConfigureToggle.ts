@@ -8,9 +8,9 @@ import { guildConfigService } from "../../services/guildConfigService.ts";
 import { catalogService } from "../../services/catalogService.ts";
 import { roleService } from "../../services/roleService.ts";
 
-export async function handleAdminConfigureToggle(
+export const handleAdminConfigureToggle = async (
   interaction: StringSelectMenuInteraction,
-): Promise<boolean> {
+): Promise<boolean> => {
   const { base, key } = (() => {
     const parts = interaction.customId.split("|");
     return { base: parts[0] ?? "", key: parts[1] ?? null };
@@ -82,4 +82,4 @@ export async function handleAdminConfigureToggle(
     .update(await renderAdminConfigure(key, refreshed))
     .then(() => true)
     .catch(() => true);
-}
+};

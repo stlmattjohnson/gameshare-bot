@@ -5,9 +5,9 @@ import { handleDmDetailPick } from "./dmDetailPick.ts";
 import { handleAdminConfigureToggle } from "./adminConfigureToggle.ts";
 import { handleUserRolesPick } from "./userRolesPick.ts";
 
-export async function handleSelectInteraction(
+export const handleSelectInteraction = async (
   interaction: StringSelectMenuInteraction,
-): Promise<boolean | InteractionResponse<boolean>> {
+): Promise<boolean | InteractionResponse<boolean>> => {
   const { base } = parseSessionCustomId(interaction.customId);
 
   if (base === CustomIds.DmDetailPick) return handleDmDetailPick(interaction);
@@ -17,6 +17,6 @@ export async function handleSelectInteraction(
     return handleUserRolesPick(interaction);
 
   return false;
-}
+};
 
 export default null;

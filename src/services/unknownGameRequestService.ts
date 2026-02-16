@@ -11,9 +11,9 @@ import { config } from "../config.ts";
 import { logger } from "../logger.ts";
 import { CustomIds } from "../domain/constants.ts";
 
-function addMinutes(d: Date, minutes: number) {
+const addMinutes = (d: Date, minutes: number) => {
   return new Date(d.getTime() + minutes * 60_000);
-}
+};
 
 export const unknownGameRequestService = {
   async shouldPrompt(guildId: string, userId: string, presenceName: string) {

@@ -4,9 +4,9 @@ import { CustomIds } from "../../domain/constants.ts";
 import { handleDmModals } from "./dmModals.ts";
 import { handleAdminConfigureSearch } from "./adminConfigureSearch.ts";
 
-export async function handleModalInteraction(
+export const handleModalInteraction = async (
   interaction: ModalSubmitInteraction,
-): Promise<boolean | InteractionResponse<boolean>> {
+): Promise<boolean | InteractionResponse<boolean>> => {
   const { base } = parseSessionCustomId(interaction.customId);
 
   if (
@@ -22,6 +22,6 @@ export async function handleModalInteraction(
   }
 
   return false;
-}
+};
 
 export default null;

@@ -5,13 +5,10 @@ import {
 } from "discord.js";
 import { guildConfigService } from "../../services/guildConfigService.ts";
 
-export async function handleAdminConfigureButtons(
-  client: any,
+export const handleAdminConfigureButtons = async (
   interaction: ButtonInteraction,
   base: string,
-  key: string | null,
-  encodedPresence: string | null,
-): Promise<boolean | InteractionResponse<boolean>> {
+): Promise<boolean | InteractionResponse<boolean>> => {
   if (base === "admin_cfg_delete_roles_toggle") {
     if (!interaction.inGuild() || !interaction.guildId) {
       return interaction.reply({ content: "Guild only.", ephemeral: true });
@@ -51,4 +48,4 @@ export async function handleAdminConfigureButtons(
   }
 
   return false;
-}
+};

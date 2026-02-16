@@ -9,13 +9,11 @@ import { gameCatalog } from "../../catalog/catalog.ts";
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { resolveGuild } from "../utils.ts";
 
-export async function handleDmShareButtons(
+export const handleDmShareButtons = async (
   client: any,
   interaction: ButtonInteraction,
   base: string,
-  key: string | null,
-  encodedPresence: string | null,
-): Promise<boolean | InteractionResponse<boolean>> {
+): Promise<boolean | InteractionResponse<boolean>> => {
   const parsed = dmShareFlowService.parseDmId(interaction.customId);
   if (!parsed) return true;
 
@@ -122,4 +120,4 @@ export async function handleDmShareButtons(
   }
 
   return false;
-}
+};

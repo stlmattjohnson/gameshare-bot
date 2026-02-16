@@ -5,9 +5,9 @@ import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 import { guildConfigService } from "./guildConfigService.ts";
 import { roleService } from "./roleService.ts";
 
-function makeCustomGameId() {
+const makeCustomGameId = () => {
   return `cg_${randomUUID().slice(0, 10)}`;
-}
+};
 
 export const adminRequestApprovalService = {
   /**

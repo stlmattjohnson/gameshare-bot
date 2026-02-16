@@ -23,14 +23,14 @@ export type AdminUxState = {
 // 15-minute admin UI sessions
 export const adminUxStore = new StateStore<AdminUxState>(15 * 60_000);
 
-export function createAdminSession(state: AdminUxState): string {
+export const createAdminSession = (state: AdminUxState): string => {
   return adminUxStore.put(state);
-}
+};
 
-export async function renderAdminConfigure(
+export const renderAdminConfigure = async (
   sessionKey: string,
   state: AdminUxState,
-): Promise<InteractionUpdateOptions> {
+): Promise<InteractionUpdateOptions> => {
   const results = await catalogService.searchAll(state.guildId, state.query);
   const start = state.page * PageSize.AdminGames;
   const pageItems = results.slice(start, start + PageSize.AdminGames);
@@ -121,9 +121,9 @@ export async function renderAdminConfigure(
 
   components.push(rowButtons, rowDeleteOpt);
   return { embeds: [embed], components };
-}
+};
 
-export function buildAdminSearchModal(sessionKey: string) {
+export const buildAdminSearchModal = (sessionKey: string) => {
   const modal = new ModalBuilder()
     .setCustomId(`${CustomIds.AdminConfigureSearch}|${sessionKey}`)
     .setTitle("Search games");
@@ -140,4 +140,4 @@ export function buildAdminSearchModal(sessionKey: string) {
     new ActionRowBuilder<TextInputBuilder>().addComponents(input),
   );
   return modal;
-}
+};

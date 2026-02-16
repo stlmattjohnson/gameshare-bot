@@ -22,14 +22,16 @@ export const adminRequestsUxStore = new StateStore<AdminRequestsState>(
   15 * 60_000,
 );
 
-export function createAdminRequestsSession(state: AdminRequestsState): string {
+export const createAdminRequestsSession = (
+  state: AdminRequestsState,
+): string => {
   return adminRequestsUxStore.put(state);
-}
+};
 
-async function buildAdminRequestsView(
+const buildAdminRequestsView = async (
   sessionKey: string,
   state: AdminRequestsState,
-) {
+) => {
   const all = await gameAddRequestRepo.listPending(state.guildId);
   const total = all.length;
 
@@ -98,26 +100,26 @@ async function buildAdminRequestsView(
     embeds: [embed],
     components: [navRow, ...decisionRows],
   };
-}
+};
 
 /**
  * Use this when sending an initial ephemeral reply (slash command).
  */
-export async function renderAdminRequests(
+export const renderAdminRequests = async (
   sessionKey: string,
   state: AdminRequestsState,
-): Promise<InteractionReplyOptions> {
+): Promise<InteractionReplyOptions> => {
   const view = await buildAdminRequestsView(sessionKey, state);
   return { ...view, ephemeral: true };
-}
+};
 
 /**
  * Use this when updating an existing interaction message (buttons).
  * Note: update/edit options do NOT allow `ephemeral`.
  */
-export async function renderAdminRequestsUpdate(
+export const renderAdminRequestsUpdate = async (
   sessionKey: string,
   state: AdminRequestsState,
-): Promise<InteractionUpdateOptions> {
+): Promise<InteractionUpdateOptions> => {
   return buildAdminRequestsView(sessionKey, state);
-}
+};

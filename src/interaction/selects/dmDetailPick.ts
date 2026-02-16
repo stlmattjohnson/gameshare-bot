@@ -9,9 +9,9 @@ import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
 import { gameCatalog } from "../../catalog/catalog.ts";
 import { customGameRepo } from "../../db/repositories/customGameRepo.ts";
 
-export async function handleDmDetailPick(
+export const handleDmDetailPick = async (
   interaction: StringSelectMenuInteraction,
-): Promise<boolean> {
+): Promise<boolean> => {
   const parsed = dmShareFlowService.parseDmId(interaction.customId);
   if (!parsed) {
     return interaction
@@ -58,4 +58,4 @@ export async function handleDmDetailPick(
 
   await interaction.showModal(dmShareFlowService.buildModal(detailKind, share));
   return true;
-}
+};

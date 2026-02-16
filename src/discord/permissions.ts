@@ -8,6 +8,6 @@ export const RequiredBotPermissions = new PermissionsBitField([
   // UseApplicationCommands is handled at OAuth2 scope level; no guild permission bit is needed for it.
 ]);
 
-export function missingPermissions(have: PermissionsBitField) {
+export const missingPermissions = (have: PermissionsBitField) => {
   return RequiredBotPermissions.toArray().filter((p) => !have.has(p));
-}
+};

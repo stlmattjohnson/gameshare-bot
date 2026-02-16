@@ -12,13 +12,13 @@ import {
 import { adminRequestApprovalService } from "../../services/adminRequestApprovalService.ts";
 import { expiredMessage, resolveGuild } from "../utils.ts";
 
-export async function handleAdminRequests(
+export const handleAdminRequests = async (
   client: any,
   interaction: ButtonInteraction,
   base: string,
   key: string | null,
   encodedPresence: string | null,
-): Promise<boolean | InteractionResponse<boolean>> {
+): Promise<boolean | InteractionResponse<boolean>> => {
   if (!key)
     return interaction.reply(expiredMessage("/gameshare admin requests"));
 
@@ -152,4 +152,4 @@ export async function handleAdminRequests(
   }
 
   return false;
-}
+};

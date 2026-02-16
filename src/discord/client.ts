@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { logger } from "../logger.ts";
 
-export function createDiscordClient() {
+export const createDiscordClient = () => {
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -17,4 +17,4 @@ export function createDiscordClient() {
   client.on("warn", (msg) => logger.warn({ msg }, "Discord client warning"));
 
   return client;
-}
+};

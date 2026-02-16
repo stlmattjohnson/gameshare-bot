@@ -4,10 +4,10 @@ import {
   InteractionResponse,
 } from "discord.js";
 
-export async function safeEphemeralReply(
+export const safeEphemeralReply = async (
   interaction: ChatInputCommandInteraction,
   options: InteractionReplyOptions,
-): Promise<InteractionResponse | void> {
+): Promise<InteractionResponse | void> => {
   try {
     if (interaction.deferred || interaction.replied) {
       await interaction.followUp({ ...options, ephemeral: true });
@@ -17,4 +17,4 @@ export async function safeEphemeralReply(
   } catch {
     // swallow; interaction may be expired
   }
-}
+};

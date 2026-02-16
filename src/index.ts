@@ -4,7 +4,7 @@ import { logger } from "./logger.ts";
 import { initDb } from "./db/prisma.ts";
 import { registerAppHandlers } from "./app.ts";
 
-async function main() {
+const main = async () => {
   await initDb();
 
   const client = createDiscordClient();
@@ -18,7 +18,7 @@ async function main() {
   });
 
   await client.login(config.discordToken);
-}
+};
 
 main().catch((err) => {
   logger.error({ err }, "Fatal startup error");

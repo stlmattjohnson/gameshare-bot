@@ -8,13 +8,13 @@ import { unknownGameRequestService } from "../../services/unknownGameRequestServ
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { resolveGuild } from "../utils.ts";
 
-export async function handleUnknownRequests(
+export const handleUnknownRequests = async (
   client: any,
   interaction: ButtonInteraction,
   base: string,
   key: string | null,
   encodedPresence: string | null,
-): Promise<boolean | InteractionResponse<boolean>> {
+): Promise<boolean | InteractionResponse<boolean>> => {
   await interaction.deferUpdate().catch(() => null);
 
   if (!key || !encodedPresence) {
@@ -90,4 +90,4 @@ export async function handleUnknownRequests(
     .send("✅ Sent to admins for review.")
     .catch(() => null);
   return true;
-}
+};

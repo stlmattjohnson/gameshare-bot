@@ -90,9 +90,9 @@ export const gameshareCommand = new SlashCommandBuilder()
   )
   .setDMPermission(false);
 
-export async function handleGameshare(
+export const handleGameshare = async (
   interaction: ChatInputCommandInteraction,
-) {
+) => {
   if (!interaction.inGuild() || !interaction.guildId) {
     return safeEphemeralReply(interaction, {
       content: "This command can only be used in a server.",
@@ -310,4 +310,4 @@ export async function handleGameshare(
   }
 
   return safeEphemeralReply(interaction, { content: "Unknown subcommand." });
-}
+};

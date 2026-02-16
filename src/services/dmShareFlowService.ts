@@ -19,13 +19,13 @@ import { prisma } from "../db/prisma.ts";
 import { PendingShare, DetailKind } from "../domain/types.ts";
 import { userDataRepo } from "../db/repositories/userDataRepo.ts";
 
-function now() {
+const now = () => {
   return new Date();
-}
+};
 
-function minutesAgo(d: Date, minutes: number) {
+const minutesAgo = (d: Date, minutes: number) => {
   return new Date(d.getTime() + minutes * 60_000);
-}
+};
 
 const pendingShareCache = new Map<string, PendingShare>();
 const cacheKey = (s: PendingShare) => `${s.guildId}:${s.userId}:${s.gameId}`;

@@ -8,11 +8,11 @@ import { CustomIds } from "../../domain/constants.ts";
 import { dmShareFlowService } from "../../services/dmShareFlowService.ts";
 import { gameCatalog } from "../../catalog/catalog.ts";
 import { customGameRepo } from "../../db/repositories/customGameRepo.ts";
-import { parseSessionCustomId, expiredMessage } from "../utils.ts";
+import { parseSessionCustomId } from "../utils.ts";
 
-export async function handleDmModals(
+export const handleDmModals = async (
   interaction: ModalSubmitInteraction,
-): Promise<boolean> {
+): Promise<boolean> => {
   const { base } = parseSessionCustomId(interaction.customId);
 
   if (
@@ -89,4 +89,4 @@ export async function handleDmModals(
   }
 
   return false;
-}
+};

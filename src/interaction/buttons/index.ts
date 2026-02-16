@@ -48,13 +48,7 @@ export async function handleButtonInteraction(
     base === CustomIds.DmConfirmPost ||
     base === CustomIds.DmCancelPost
   ) {
-    return handleDmShareButtons(
-      client,
-      interaction,
-      base,
-      key,
-      encodedPresence,
-    );
+    return handleDmShareButtons(client, interaction, base);
   }
 
   // Admin configure small buttons
@@ -62,13 +56,7 @@ export async function handleButtonInteraction(
     base === CustomIds.AdminConfigureDeleteRolesToggle ||
     base === CustomIds.AdminConfigureDeleteRolesConfirm
   ) {
-    return handleAdminConfigureButtons(
-      client,
-      interaction,
-      base,
-      key,
-      encodedPresence,
-    );
+    return handleAdminConfigureButtons(interaction, base);
   }
 
   return false;

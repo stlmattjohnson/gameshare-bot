@@ -11,7 +11,7 @@ import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 import { logger } from "../logger.ts";
 import { guildConfigService } from "../services/guildConfigService.ts";
 
-export function registerPresenceHandler(client: any) {
+export const registerPresenceHandler = (client: any) => {
   client.on(
     "presenceUpdate",
     async (oldPresence: Presence | null, newPresence: Presence) => {
@@ -87,4 +87,4 @@ export function registerPresenceHandler(client: any) {
       }
     },
   );
-}
+};

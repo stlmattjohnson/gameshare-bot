@@ -6,9 +6,9 @@ import {
 } from "../../services/ux/adminConfigureGamesUx.ts";
 import { parseSessionCustomId, expiredMessage } from "../utils.ts";
 
-export async function handleAdminConfigureSearch(
+export const handleAdminConfigureSearch = async (
   interaction: ModalSubmitInteraction,
-): Promise<boolean> {
+): Promise<boolean> => {
   const { base, key } = parseSessionCustomId(interaction.customId);
 
   if (base === CustomIds.AdminConfigureSearch) {
@@ -42,4 +42,4 @@ export async function handleAdminConfigureSearch(
   }
 
   return false;
-}
+};

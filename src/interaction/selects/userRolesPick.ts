@@ -9,9 +9,9 @@ import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo
 import { gameCatalog } from "../../catalog/catalog.ts";
 import { roleService } from "../../services/roleService.ts";
 
-export async function handleUserRolesPick(
+export const handleUserRolesPick = async (
   interaction: StringSelectMenuInteraction,
-): Promise<boolean> {
+): Promise<boolean> => {
   const { base, key } = (() => {
     const parts = interaction.customId.split("|");
     return { base: parts[0] ?? "", key: parts[1] ?? null };
@@ -98,4 +98,4 @@ export async function handleUserRolesPick(
     .update(await renderUserRoles(key, refreshed))
     .then(() => true)
     .catch(() => true);
-}
+};

@@ -3,7 +3,7 @@ import { config } from "../config.ts";
 import { gameshareCommand } from "../commands/gameshare.ts";
 import { logger } from "../logger.ts";
 
-async function run() {
+const run = async () => {
   const rest = new REST({ version: "10" }).setToken(config.discordToken);
 
   const body = [gameshareCommand.toJSON()];
@@ -15,6 +15,6 @@ async function run() {
     logger.error({ err }, "Failed to register commands");
     process.exit(1);
   }
-}
+};
 
 run();
