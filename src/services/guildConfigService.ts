@@ -1,6 +1,6 @@
-import { guildConfigRepo } from "../db/repositories/guildConfigRepo.js";
-import { enabledGameRepo } from "../db/repositories/enabledGameRepo.js";
-import { gameRoleMapRepo } from "../db/repositories/gameRoleMapRepo.js";
+import { guildConfigRepo } from "../db/repositories/guildConfigRepo.ts";
+import { enabledGameRepo } from "../db/repositories/enabledGameRepo.ts";
+import { gameRoleMapRepo } from "../db/repositories/gameRoleMapRepo.ts";
 
 export const guildConfigService = {
   getOrCreate: guildConfigRepo.getOrCreate,

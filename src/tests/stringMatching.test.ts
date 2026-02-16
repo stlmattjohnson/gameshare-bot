@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { normalizeName } from "../catalog/normalize.js";
-import { gameCatalog } from "../catalog/catalog.js";
+import { normalizeName } from "../catalog/normalize.ts";
+import { gameCatalog } from "../catalog/catalog.ts";
 
 describe("string matching", () => {
   it("normalizes names", () => {

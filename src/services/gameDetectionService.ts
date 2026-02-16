@@ -1,5 +1,5 @@
 import { ActivityType, Presence } from "discord.js";
-import { gameCatalog } from "../catalog/catalog.js";
+import { gameCatalog } from "../catalog/catalog.ts";
 
 export function extractPlayingName(presence: Presence | null): string | null {
   if (!presence) return null;

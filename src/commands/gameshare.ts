@@ -5,24 +5,24 @@ import {
   ChannelType,
   TextChannel,
 } from "discord.js";
-import { safeEphemeralReply } from "../discord/responders.js";
-import { guildConfigService } from "../services/guildConfigService.js";
+import { safeEphemeralReply } from "../discord/responders.ts";
+import { guildConfigService } from "../services/guildConfigService.ts";
 import {
   createAdminSession,
   renderAdminConfigure,
-} from "../services/ux/adminConfigureGamesUx.js";
+} from "../services/ux/adminConfigureGamesUx.ts";
 import {
   createUserRolesSession,
   renderUserRoles,
-} from "../services/ux/userRolesUx.js";
-import { optInService } from "../services/optInService.js";
-import { userDataRepo } from "../db/repositories/userDataRepo.js";
-import { gameCatalog } from "../catalog/catalog.js";
+} from "../services/ux/userRolesUx.ts";
+import { optInService } from "../services/optInService.ts";
+import { userDataRepo } from "../db/repositories/userDataRepo.ts";
+import { gameCatalog } from "../catalog/catalog.ts";
 import {
   createAdminRequestsSession,
   renderAdminRequests,
-} from "../services/ux/adminRequestsUx.js";
-import { customGameRepo } from "../db/repositories/customGameRepo.js";
+} from "../services/ux/adminRequestsUx.ts";
+import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 
 export const gameshareCommand = new SlashCommandBuilder()
   .setName("gameshare")

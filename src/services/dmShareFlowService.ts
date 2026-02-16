@@ -2,7 +2,6 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  ChannelType,
   EmbedBuilder,
   ModalBuilder,
   TextInputBuilder,
@@ -11,14 +10,14 @@ import {
   StringSelectMenuOptionBuilder,
   User,
 } from "discord.js";
-import { CustomIds } from "../domain/constants.js";
-import { logger } from "../logger.js";
-import { config } from "../config.js";
-import { cooldownRepo } from "../db/repositories/cooldownRepo.js";
-import { guildConfigService } from "./guildConfigService.js";
-import { prisma } from "../db/prisma.js";
-import { PendingShare, DetailKind } from "../domain/types.js";
-import { userDataRepo } from "../db/repositories/userDataRepo.js";
+import { CustomIds } from "../domain/constants.ts";
+import { logger } from "../logger.ts";
+import { config } from "../config.ts";
+import { cooldownRepo } from "../db/repositories/cooldownRepo.ts";
+import { guildConfigService } from "./guildConfigService.ts";
+import { prisma } from "../db/prisma.ts";
+import { PendingShare, DetailKind } from "../domain/types.ts";
+import { userDataRepo } from "../db/repositories/userDataRepo.ts";
 
 function now() {
   return new Date();

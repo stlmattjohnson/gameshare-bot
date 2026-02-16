@@ -1,4 +1,4 @@
-import { userOptInRepo } from "../db/repositories/userOptInRepo.js";
+import { userOptInRepo } from "../db/repositories/userOptInRepo.ts";
 
 export const optInService = {
   setOptIn: userOptInRepo.setOptIn,

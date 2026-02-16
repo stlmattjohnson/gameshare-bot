@@ -1,8 +1,8 @@
-import { createDiscordClient } from "./discord/client.js";
-import { config } from "./config.js";
-import { logger } from "./logger.js";
-import { initDb } from "./db/prisma.js";
-import { registerAppHandlers } from "./app.js";
+import { createDiscordClient } from "./discord/client.ts";
+import { config } from "./config.ts";
+import { logger } from "./logger.ts";
+import { initDb } from "./db/prisma.ts";
+import { registerAppHandlers } from "./app.ts";
 
 async function main() {
   await initDb();

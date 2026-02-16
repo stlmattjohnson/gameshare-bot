@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dmShareFlowService } from "../services/dmShareFlowService.js";
+import { dmShareFlowService } from "../services/dmShareFlowService.ts";
 
 describe("validation", () => {
   it("validates server ip", () => {

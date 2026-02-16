@@ -9,10 +9,10 @@ import {
   TextInputStyle,
   InteractionUpdateOptions
 } from "discord.js";
-import { CustomIds, PageSize, Limits } from "../../domain/constants.js";
-import { guildConfigService } from "../guildConfigService.js";
-import { StateStore } from "./stateStore.js";
-import { catalogService } from "../catalogService.js";
+import { CustomIds, PageSize, Limits } from "../../domain/constants.ts";
+import { guildConfigService } from "../guildConfigService.ts";
+import { StateStore } from "./stateStore.ts";
+import { catalogService } from "../catalogService.ts";
 
 export type AdminUxState = {
   guildId: string;

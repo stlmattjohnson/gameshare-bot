@@ -1,9 +1,9 @@
 import type { Guild } from "discord.js";
 import { randomUUID } from "crypto";
-import { gameAddRequestRepo } from "../db/repositories/gameAddRequestRepo.js";
-import { customGameRepo } from "../db/repositories/customGameRepo.js";
-import { guildConfigService } from "./guildConfigService.js";
-import { roleService } from "./roleService.js";
+import { gameAddRequestRepo } from "../db/repositories/gameAddRequestRepo.ts";
+import { customGameRepo } from "../db/repositories/customGameRepo.ts";
+import { guildConfigService } from "./guildConfigService.ts";
+import { roleService } from "./roleService.ts";
 
 function makeCustomGameId() {
   return `cg_${randomUUID().slice(0, 10)}`;

@@ -1,6 +1,6 @@
-import { gameCatalog } from "../catalog/catalog.js";
-import { normalizeName } from "../catalog/normalize.js";
-import { customGameRepo } from "../db/repositories/customGameRepo.js";
+import { gameCatalog } from "../catalog/catalog.ts";
+import { normalizeName } from "../catalog/normalize.ts";
+import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 
 export type AnyGame = {
   id: string;

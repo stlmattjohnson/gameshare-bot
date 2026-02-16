@@ -1,9 +1,9 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, User } from "discord.js";
-import { unknownCooldownRepo } from "../db/repositories/unknownCooldownRepo.js";
-import { gameAddRequestRepo } from "../db/repositories/gameAddRequestRepo.js";
-import { config } from "../config.js";
-import { logger } from "../logger.js";
-import { CustomIds } from "../domain/constants.js";
+import { unknownCooldownRepo } from "../db/repositories/unknownCooldownRepo.ts";
+import { gameAddRequestRepo } from "../db/repositories/gameAddRequestRepo.ts";
+import { config } from "../config.ts";
+import { logger } from "../logger.ts";
+import { CustomIds } from "../domain/constants.ts";
 
 function addMinutes(d: Date, minutes: number) {
   return new Date(d.getTime() + minutes * 60_000);

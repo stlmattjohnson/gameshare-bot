@@ -6,9 +6,9 @@ import {
   InteractionReplyOptions,
   InteractionUpdateOptions
 } from "discord.js";
-import { StateStore } from "./stateStore.js";
-import { CustomIds } from "../../domain/constants.js";
-import { gameAddRequestRepo } from "../../db/repositories/gameAddRequestRepo.js";
+import { StateStore } from "./stateStore.ts";
+import { CustomIds } from "../../domain/constants.ts";
+import { gameAddRequestRepo } from "../../db/repositories/gameAddRequestRepo.ts";
 
 export type AdminRequestsState = {
   guildId: string;

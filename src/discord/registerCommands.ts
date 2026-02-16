@@ -1,7 +1,7 @@
 import { REST, Routes } from "discord.js";
-import { config } from "../config.js";
-import { gameshareCommand } from "../commands/gameshare.js";
-import { logger } from "../logger.js";
+import { config } from "../config.ts";
+import { gameshareCommand } from "../commands/gameshare.ts";
+import { logger } from "../logger.ts";
 
 async function run() {
   const rest = new REST({ version: "10" }).setToken(config.discordToken);

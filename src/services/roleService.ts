@@ -1,6 +1,6 @@
 import { Guild, PermissionsBitField, Role } from "discord.js";
-import { config } from "../config.js";
-import { logger } from "../logger.js";
+import { config } from "../config.ts";
+import { logger } from "../logger.ts";
 
 export const roleService = {
   async ensureGameRole(guild: Guild, gameName: string): Promise<Role> {
