@@ -60,30 +60,33 @@ export const handleDmModals = async (
       detailKind,
       detailValue: value,
     };
-    dmShareFlowService.cachePut(share);
 
-    return interaction
-      .reply({
-        content: `Preview:\n**${gameName}**\n${detailKind === "STEAM" ? `Steam ID: ${value}` : detailKind === "SERVER_NAME" ? `Server: ${value}` : `Join: ${value}`}\n\nPost this to the server?`,
-        components: [
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-              .setCustomId(
-                dmShareFlowService.dmId(CustomIds.DmConfirmPost, share),
-              )
-              .setLabel("Confirm")
-              .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-              .setCustomId(
-                dmShareFlowService.dmId(CustomIds.DmCancelPost, share),
-              )
-              .setLabel("Cancel")
-              .setStyle(ButtonStyle.Secondary),
-          ),
-        ],
-      })
-      .then(() => true)
-      .catch(() => true);
+    // Defer the modal reply (ephemeral) because updating the DM may take longer
+    try {
+      await interaction.deferReply({ ephemeral: true });
+    } catch {}
+
+    dmShareFlowService.cachePut(share);
+    await dmShareFlowService
+      .sendPreviewDm(interaction.user, share)
+      .catch((err) => {
+        console.error("sendPreviewDm error:", err);
+      });
+
+    try {
+      await interaction.editReply({
+        content: "Confirm the preview to post your message!",
+      });
+    } catch {
+      try {
+        await interaction.reply({
+          content: "Confirm the preview to post your message!",
+          ephemeral: true,
+        });
+      } catch {}
+    }
+
+    return true;
   }
 
   return false;

@@ -29,30 +29,38 @@ export const handleDmDetailPick = async (
 
   if (detailKind === "NONE") {
     dmShareFlowService.cachePut(share);
-    await interaction.user
-      .send({
-        content: `Preview:\n**${gameName}**\nNo extra details.\n\nPost this to the server?`,
-        components: [
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-              .setCustomId(
-                dmShareFlowService.dmId(CustomIds.DmConfirmPost, share),
-              )
-              .setLabel("Confirm")
-              .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-              .setCustomId(
-                dmShareFlowService.dmId(CustomIds.DmCancelPost, share),
-              )
-              .setLabel("Cancel")
-              .setStyle(ButtonStyle.Secondary),
-          ),
-        ],
-      })
-      .catch(() => null);
+    const preview = `**${gameName}**\nNo extra details.\n\nPost this to the server?`;
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId(dmShareFlowService.dmId(CustomIds.DmConfirmPost, share))
+        .setLabel("Confirm")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId(dmShareFlowService.dmId(CustomIds.DmCancelPost, share))
+        .setLabel("Cancel")
+        .setStyle(ButtonStyle.Secondary),
+    );
+
+    try {
+      await interaction.update({
+        content: `Preview:\n${preview}`,
+        components: [row],
+      });
+    } catch {
+      await dmShareFlowService
+        .sendPreviewDm(interaction.user, share)
+        .catch(() => null);
+    }
 
     return true;
   }
+
+  // Cache the DM message id so the modal submit handler can edit the same message
+  try {
+    const msgId = interaction.message?.id;
+    if (msgId)
+      dmShareFlowService.cacheSetDmMessageId(guildId, userId, gameId, msgId);
+  } catch {}
 
   await interaction.showModal(dmShareFlowService.buildModal(detailKind, share));
   return true;

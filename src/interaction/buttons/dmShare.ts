@@ -49,7 +49,19 @@ export const handleDmShareButtons = async (
   }
 
   if (base === CustomIds.DmCancelPost) {
-    await interaction.message.edit({ components: [] }).catch(() => null);
+    try {
+      await interaction.message
+        .edit({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Cancelled")
+              .setDescription("Share cancelled — nothing was posted."),
+          ],
+          components: [],
+        })
+        .catch(() => null);
+    } catch {}
+
     dmShareFlowService.cacheDelete(guildId, userId, gameId);
     await dmShareFlowService
       .setInFlight(guildId, userId, gameId, false)
@@ -103,24 +115,21 @@ export const handleDmShareButtons = async (
       cached.detailKind === "NONE"
         ? ""
         : cached.detailKind === "STEAM"
-          ? `Steam ID: ${cached.detailValue}`
+          ? `**Steam ID:** ${cached.detailValue}`
           : cached.detailKind === "SERVER_NAME"
-            ? `Server Name: ${cached.detailValue}`
-            : `Server IP: ${cached.detailValue}`;
+            ? `**Server Name:** ${cached.detailValue}`
+            : `**Server IP:** ${cached.detailValue}`;
 
     const embed = new EmbedBuilder()
       .setTitle(`🎮 **${gameName}**`)
       .setDescription(
-        [
-          `<@${userId}> is playing **${cached.gameName}**`,
-          detailText || undefined,
-        ]
+        [`<@${userId}> is playing`, detailText || undefined]
           .filter(Boolean)
           .join("\n"),
       )
       .setFooter({
         text: roleId
-          ? "Want to change your notifications for this game? React ➕ to add the role, or ➖ to remove it."
+          ? "Want to change your notifications for this game?\nReact ➕ to add the role, or ➖ to remove it."
           : "",
       });
 
@@ -150,13 +159,24 @@ export const handleDmShareButtons = async (
       );
     }
 
-    await interaction.message.edit({ components: [] }).catch(() => null);
+    try {
+      await interaction.message
+        .edit({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle(`✅ ${gameName} session shared!`)
+              .setDescription(`Posted in <#${cfg.announceChannelId}>.`),
+          ],
+          components: [],
+        })
+        .catch(() => null);
+    } catch {}
+
     dmShareFlowService.cacheDelete(guildId, userId, gameId);
     await dmShareFlowService
       .setInFlight(guildId, userId, gameId, false)
       .catch(() => null);
 
-    await interaction.user.send("✅ Posted!").catch(() => null);
     return true;
   }
 

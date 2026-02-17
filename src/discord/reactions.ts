@@ -23,10 +23,6 @@ const abortRoleAction = async (
 export const registerReactionHandlers = (client: Client) => {
   client.on("messageReactionAdd", async (reaction, user) => {
     try {
-      console.log({
-        reaction: reaction.partial ? "partial" : "full",
-        user: user.id,
-      });
       if (user.bot) return;
       if (reaction.partial) await reaction.fetch().catch(() => null);
       let message = reaction.message;
@@ -38,7 +34,6 @@ export const registerReactionHandlers = (client: Client) => {
         return;
       }
       const mapping = await dmShareFlowService.getPostedMessage(message.id);
-      console.log({ mapping });
       if (!mapping) {
         await abortRoleAction(reaction, user);
         return;
@@ -47,21 +42,18 @@ export const registerReactionHandlers = (client: Client) => {
       const guild = await client.guilds
         .fetch(mapping.guildId)
         .catch(() => null);
-      console.log({ guild });
       if (!guild) {
         await abortRoleAction(reaction, user);
         return;
       }
 
       const member = await guild.members.fetch(user.id).catch(() => null);
-      console.log({ member });
       if (!member) {
         await abortRoleAction(reaction, user);
         return;
       }
 
       const emoji = reaction.emoji.name;
-      console.log({ emoji });
       if (emoji === ADD_EMOJI) {
         if (mapping.roleId) {
           // If user already has the role, remove their reaction to reflect current state
@@ -89,10 +81,6 @@ export const registerReactionHandlers = (client: Client) => {
 
   client.on("messageReactionRemove", async (reaction, user) => {
     try {
-      console.log({
-        reaction: reaction.partial ? "partial" : "full",
-        user: user.id,
-      });
       if (user.bot) return;
       if (reaction.partial) await reaction.fetch().catch(() => null);
       let message = reaction.message;
