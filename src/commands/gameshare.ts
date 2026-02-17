@@ -18,6 +18,7 @@ import {
 import { optInService } from "../services/optInService.ts";
 import { userDataRepo } from "../db/repositories/userDataRepo.ts";
 import { catalogService } from "../services/catalogService.ts";
+import { handleSessions } from "./sessions.ts";
 import {
   createAdminRequestsSession,
   renderAdminRequests,
@@ -83,6 +84,11 @@ export const gameshareCommand = new SlashCommandBuilder()
     s.setName("roles").setDescription("Pick which game roles you want"),
   )
   .addSubcommand((s) => s.setName("privacy").setDescription("Privacy details"))
+  .addSubcommand((s) =>
+    s
+      .setName("sessions")
+      .setDescription("List active gameshare sessions in this guild"),
+  )
   .addSubcommand((s) =>
     s
       .setName("delete-my-data")
@@ -276,6 +282,11 @@ export const handleGameshare = async (
     const key = createUserRolesSession(state);
     const ui = await renderUserRoles(key, state);
     return safeEphemeralReply(interaction, { ...(ui as any), ephemeral: true });
+  }
+
+  if (sub === "sessions") {
+    await handleSessions(interaction);
+    return;
   }
 
   if (sub === "privacy") {

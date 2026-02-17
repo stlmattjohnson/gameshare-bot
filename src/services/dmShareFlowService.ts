@@ -474,9 +474,27 @@ export const dmShareFlowService = {
       roleId: r.roleId ?? undefined,
       detailKind: r.detailKind ?? undefined,
       detailValue: r.detailValue ?? undefined,
+      createdAt: r.createdAt,
     }));
   },
 
+  async getActiveSessionsForGuild(guildId: string) {
+    const rows = await prisma.session.findMany({
+      where: { guildId, active: true },
+    });
+    return rows.map((r) => ({
+      sessionId: r.id,
+      messageId: r.messageId,
+      guildId: r.guildId,
+      channelId: r.channelId,
+      userId: r.userId,
+      gameId: r.gameId,
+      roleId: r.roleId ?? undefined,
+      detailKind: r.detailKind ?? undefined,
+      detailValue: r.detailValue ?? undefined,
+      createdAt: r.createdAt,
+    }));
+  },
   async markSessionInactiveById(sessionId: number) {
     await prisma.session
       .update({ where: { id: sessionId }, data: { active: false } })
