@@ -1,50 +1,67 @@
-# GameShare Discord Bot (TypeScript + discord.js v14 + Prisma + SQLite)
+# GameShare Discord Bot (TypeScript + discord.js + Prisma + SQLite)
 
-A production-ready bot that:
-- Lets admins enable/disable games from a large catalog (search + pagination).
-- Creates/maintains a role per enabled game.
-- Lets users opt in and select which enabled game roles they want.
-- Detects when opted-in users start playing an enabled game.
-- DMs the user to confirm sharing, optionally with details, and posts to an announce channel tagging the game role.
+GameShare helps communities announce when members start playing games and lets other users opt in/out of game-specific roles.
+
+Core features:
+
+- Admin UI to enable/disable games from a large static catalog or server-specific custom games.
+- Automatic creation and maintenance of a role per enabled game.
+- Opt-in presence monitoring per user and per-server.
+- Single-message DM flow: the bot edits a single DM as the user moves through the share flow (prompt → details → preview → confirm/cancel).
+- Robust announce posts that include a role mention and reaction buttons so members can add/remove the role by reacting.
+- Persistent session state in the database so posted announcements and active sessions survive restarts.
+- Presence-driven lifecycle: when a user stops playing the game the session is marked inactive and the announce message is updated to past tense and reactions are removed.
+- Admin/user command: `/gameshare sessions` — lists active sessions grouped by game (ephemeral, formatted with separators).
 
 ## Requirements
+
 - Node.js 20+
 - A Discord application + bot token
-- Prisma uses SQLite by default
+- Prisma (configured to use SQLite by default in this repo)
 
 ## Discord Developer Portal setup
+
 1. Create an application and add a Bot.
 2. Copy:
    - Bot Token → `DISCORD_TOKEN`
    - Application ID → `DISCORD_APPLICATION_ID`
-3. Enable Presence Intent:
+3. Enable privileged intents in the Developer Portal where indicated:
    - Bot → Privileged Gateway Intents → **Presence Intent** = ON
-   - (This is required for game detection.)
-4. Invite the bot with required permissions.
+   - Bot → Privileged Gateway Intents → **Server Members Intent** = ON
+4. Invite the bot with the appropriate permissions (see below).
 
-### Required Gateway Intents
+### Gateway Intents required by the bot
+
 - Guilds
-- GuildPresences (required)
-- DirectMessages
+- Guild Presences (for detecting Playing presence)
+- Guild Members (to resolve member display names and manage roles)
+- Guild Message Reactions (to receive reaction add/remove events)
+- Direct Messages (for DM flows)
 
-### Required Bot Permissions
-- Manage Roles
-- Send Messages
-- Read Message History (optional but used in some flows)
-- View Channels
+Additionally the bot code uses partials for resilient reaction handling; ensure your client enables partials for `Message`, `Reaction`, and `User`.
 
-**Permissions integer** used by this repo: `2415987712`
+### Bot permissions
 
-Invite URL format:
-`https://discord.com/api/oauth2/authorize?client_id=APP_ID&permissions=2415987712&scope=bot%20applications.commands`
+The bot must be granted the following permissions in the guild (or be given a role with these permissions):
 
-(Or run `npm run invite` after setting `DISCORD_APPLICATION_ID`.)
+- Manage Roles (required to add/remove game roles)
+- Manage Messages (required for removing user reactions when needed)
+- Add Reactions (to add the opt-in/opt-out emoji to announce posts)
+- Send Messages (to post announcements)
+- View Channels (to access the announce channel)
+- Read Message History (used in some flows)
+
+Note: role hierarchy still applies — the bot's highest role must be above the game roles it manages.
+
+If you use the provided invite helper, confirm the permissions integer includes `Manage Messages` and `Add Reactions` in addition to `Manage Roles` and standard messaging perms.
 
 ## Setup
+
 ```bash
-cp .env.example .env
+cp [.env.example](http://_vscodecontentref_/1) .env
 # Fill DISCORD_TOKEN and DISCORD_APPLICATION_ID
 npm install
 npm run prisma:migrate
 npm run commands:register
 npm run dev
+```
