@@ -154,8 +154,12 @@ export const handleDmShareButtons = async (
       await dmShareFlowService.registerPostedMessage(
         sent.id,
         guildId,
+        channel.id,
+        userId,
         gameId,
         roleId,
+        cached.detailKind,
+        cached.detailValue,
       );
     }
 

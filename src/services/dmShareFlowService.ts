@@ -36,7 +36,17 @@ const dmKey = (guildId: string, userId: string, gameId: string) =>
   `${guildId}:${userId}:${gameId}`;
 
 // Persist posted announce messages so reaction handlers can map message -> role/game
-type PostedMapping = { guildId: string; gameId: string; roleId?: string };
+type PostedMapping = {
+  sessionId?: number;
+  messageId?: string;
+  guildId: string;
+  channelId?: string;
+  userId?: string;
+  gameId: string;
+  roleId?: string;
+  detailKind?: string;
+  detailValue?: string;
+};
 
 export const dmShareFlowService = {
   cachePut(share: Share) {
@@ -394,29 +404,82 @@ export const dmShareFlowService = {
   async registerPostedMessage(
     messageId: string,
     guildId: string,
+    channelId: string,
+    userId: string,
     gameId: string,
     roleId?: string,
+    detailKind?: string,
+    detailValue?: string,
   ) {
-    await prisma.postedMessage.upsert({
+    const row = await prisma.session.upsert({
       where: { messageId },
-      update: { guildId, gameId, roleId },
-      create: { messageId, guildId, gameId, roleId },
+      update: {
+        guildId,
+        channelId,
+        userId,
+        gameId,
+        roleId,
+        detailKind: detailKind ?? null,
+        detailValue: detailValue ?? null,
+        active: true,
+      },
+      create: {
+        messageId,
+        guildId,
+        channelId,
+        userId,
+        gameId,
+        roleId,
+        detailKind: detailKind ?? null,
+        detailValue: detailValue ?? null,
+        active: true,
+      },
     });
+    return row;
   },
 
   async getPostedMessage(messageId: string): Promise<PostedMapping | null> {
-    const row = await prisma.postedMessage.findUnique({ where: { messageId } });
-    if (!row) return null;
+    const row = await prisma.session.findUnique({ where: { messageId } });
+    if (!row || !row.active) return null;
     return {
+      sessionId: row.id,
+      messageId: row.messageId,
       guildId: row.guildId,
+      channelId: row.channelId,
+      userId: row.userId,
       gameId: row.gameId,
       roleId: row.roleId ?? undefined,
+      detailKind: row.detailKind ?? undefined,
+      detailValue: row.detailValue ?? undefined,
     };
   },
 
   async unregisterPostedMessage(messageId: string) {
-    await prisma.postedMessage
-      .delete({ where: { messageId } })
+    await prisma.session
+      .updateMany({ where: { messageId }, data: { active: false } })
+      .catch(() => null);
+  },
+
+  async getActiveSessionsForUser(guildId: string, userId: string) {
+    const rows = await prisma.session.findMany({
+      where: { guildId, userId, active: true },
+    });
+    return rows.map((r) => ({
+      sessionId: r.id,
+      messageId: r.messageId,
+      guildId: r.guildId,
+      channelId: r.channelId,
+      userId: r.userId,
+      gameId: r.gameId,
+      roleId: r.roleId ?? undefined,
+      detailKind: r.detailKind ?? undefined,
+      detailValue: r.detailValue ?? undefined,
+    }));
+  },
+
+  async markSessionInactiveById(sessionId: number) {
+    await prisma.session
+      .update({ where: { id: sessionId }, data: { active: false } })
       .catch(() => null);
   },
 

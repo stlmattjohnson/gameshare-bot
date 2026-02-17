@@ -160,3 +160,21 @@ model PostedMessage {
 
   @@index([guildId])
 }
+
+model Session {
+  id         Int      @id @default(autoincrement())
+  messageId  String   @unique
+  guildId    String
+  channelId  String
+  userId     String
+  gameId     String
+  roleId     String?
+  detailKind String?
+  detailValue String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([guildId])
+  @@index([userId])
+}

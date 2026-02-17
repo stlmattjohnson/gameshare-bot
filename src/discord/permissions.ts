@@ -5,6 +5,7 @@ export const RequiredBotPermissions = new PermissionsBitField([
   PermissionsBitField.Flags.SendMessages,
   PermissionsBitField.Flags.ReadMessageHistory,
   PermissionsBitField.Flags.ManageRoles,
+  PermissionsBitField.Flags.ManageMessages,
   // UseApplicationCommands is handled at OAuth2 scope level; no guild permission bit is needed for it.
 ]);
 

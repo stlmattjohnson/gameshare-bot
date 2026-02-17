@@ -1,4 +1,4 @@
-import { Client, Presence } from "discord.js";
+import { Client, Presence, EmbedBuilder, TextChannel } from "discord.js";
 import { optInService } from "../services/optInService.ts";
 import { extractPlayingName } from "../services/gameDetectionService.ts";
 import { catalogService } from "../services/catalogService.ts";
@@ -15,6 +15,58 @@ export const registerPresenceHandler = (client: Client) => {
         const guildId = newPresence.guild?.id;
         const userId = newPresence.userId;
         if (!guildId || !userId) return;
+
+        // If user's presence changed, expire any active sessions for that user in this guild
+        try {
+          const active = await dmShareFlowService.getActiveSessionsForUser(
+            guildId,
+            userId,
+          );
+          if (active && active.length) {
+            for (const s of active) {
+              try {
+                const guildObj = await client.guilds
+                  .fetch(s.guildId)
+                  .catch(() => null);
+                const ch = guildObj
+                  ? await guildObj.channels.fetch(s.channelId).catch(() => null)
+                  : null;
+                const msg =
+                  ch && (ch as TextChannel).messages
+                    ? await (ch as TextChannel).messages
+                        .fetch(s.messageId)
+                        .catch(() => null)
+                    : null;
+                if (msg) {
+                  // Edit to past tense and remove details/react blurb
+                  const newEmbed = msg.embeds[0]
+                    ? new EmbedBuilder()
+                        .setTitle(msg.embeds[0].title ?? "")
+                        .setDescription(
+                          s.userId ? `<@${s.userId}> was playing` : "",
+                        )
+                    : null;
+                  if (newEmbed) {
+                    await msg
+                      .edit({ embeds: [newEmbed], content: undefined })
+                      .catch(() => null);
+                  }
+                  // Remove all reactions
+                  try {
+                    await msg.reactions.removeAll().catch(() => {});
+                  } catch {}
+                }
+              } catch (err) {
+                // ignore per-session errors
+              }
+              // mark session inactive in DB
+              if (s.sessionId)
+                await dmShareFlowService.markSessionInactiveById(s.sessionId);
+            }
+          }
+        } catch (err) {
+          // non-fatal
+        }
 
         const optedIn = await optInService.isOptedIn(guildId, userId);
         if (!optedIn) return;
@@ -53,11 +105,13 @@ export const registerPresenceHandler = (client: Client) => {
         );
         if (!canPrompt) return;
 
+        await dmShareFlowService.setInFlight(guildId, userId, game.id, false);
         const inFlight = await dmShareFlowService.isInFlight(
           guildId,
           userId,
           game.id,
         );
+        console.log({ inFlight }); // --- IGNORE ---
         if (inFlight) return;
 
         const user = await client.users.fetch(userId).catch(() => null);
