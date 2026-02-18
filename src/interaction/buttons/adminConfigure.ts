@@ -105,6 +105,28 @@ export const handleAdminConfigureButtons = async (
         await guildConfigService.setRoleId(state.guildId, gameId, role.id);
       } else {
         await guildConfigService.disableGame(state.guildId, gameId);
+
+        const cfg = await guildConfigService.getOrCreate(state.guildId);
+        if (cfg.deleteDisabledRoles) {
+          const roleId = await guildConfigService.getRoleId(
+            state.guildId,
+            gameId,
+          );
+
+          if (roleId) {
+            const role =
+              guild.roles.cache.get(roleId) ??
+              (await guild.roles.fetch(roleId).catch(() => null));
+            if (role) {
+              const canManage = await roleService.canManageRole(guild, role);
+              if (canManage.ok) {
+                await role.delete(
+                  "GameShare: disabled game and deleteDisabledRoles is ON",
+                );
+              }
+            }
+          }
+        }
       }
 
       const refreshed = adminUxStore.get(key);

@@ -4,6 +4,7 @@ import {
   ChatInputCommandInteraction,
   ChannelType,
   TextChannel,
+  EmbedBuilder,
 } from "discord.js";
 import { safeEphemeralReply } from "../discord/responders.ts";
 import { guildConfigService } from "../services/guildConfigService.ts";
@@ -181,32 +182,53 @@ export const handleGameshare = async (
         enabledIds,
       );
 
-      const enabledNames = enabledGames.map((g) => g.name).slice(0, 25);
+      const enabledNames = enabledGames
+        .map((g) => g.name)
+        .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+        .slice(0, 25);
 
       const missingRoles = mappings
         .filter((m) => !interaction.guild?.roles.cache.has(m.roleId))
         .slice(0, 10);
 
-      const presenceIntentHint =
-        "If game detection isn’t working: enable **Presence Intent** in the Discord Developer Portal (Bot → Privileged Gateway Intents → Presence Intent) and re-invite / restart.";
+      const missingGameIds = missingRoles.map((m) => m.gameId);
+      const missingGames = missingGameIds.length
+        ? await catalogService.getAnyGamesByIds(
+            interaction.guildId,
+            missingGameIds,
+          )
+        : [];
+
+      const missingNameById = new Map(
+        missingGames.map((g) => [g.id, g.name] as const),
+      );
+
+      const missingNames = Array.from(
+        new Set(
+          missingRoles.map((m) => missingNameById.get(m.gameId) ?? m.gameId),
+        ),
+      ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+      const lines = [
+        `**Announce channel:** ${cfg.announceChannelId ? `<#${cfg.announceChannelId}>` : "_not set_"}`,
+        `**Request channel:** ${cfg.requestChannelId ? `<#${cfg.requestChannelId}>` : "_not set_"}`,
+        `**Enabled games:** ${enabledIds.length}`,
+        `**Delete roles for disabled games (default OFF):** ${cfg.deleteDisabledRoles ? "ON" : "OFF"}`,
+        "",
+        enabledNames.length
+          ? `**Some enabled games:** ${enabledNames.join(", ")}`
+          : "",
+        missingNames.length
+          ? `**Missing mapped roles:** ${missingNames.join(", ")}`
+          : "",
+      ].filter(Boolean);
+
+      const embed = new EmbedBuilder()
+        .setTitle("GameShare status")
+        .setDescription(lines.join("\n"));
 
       return safeEphemeralReply(interaction, {
-        content: [
-          `**Announce channel:** ${cfg.announceChannelId ? `<#${cfg.announceChannelId}>` : "_not set_"}`,
-          `**Enabled games:** ${enabledIds.length}`,
-          `**Delete roles for disabled games (default OFF):** ${cfg.deleteDisabledRoles ? "ON" : "OFF"}`,
-          "",
-          enabledNames.length
-            ? `**Some enabled games:** ${enabledNames.join(", ")}`
-            : "",
-          missingRoles.length
-            ? `**Missing mapped roles:** ${missingRoles.map((m) => m.gameId).join(", ")}`
-            : "",
-          "",
-          presenceIntentHint,
-        ]
-          .filter(Boolean)
-          .join("\n"),
+        embeds: [embed],
       });
     }
 

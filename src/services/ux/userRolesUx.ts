@@ -33,6 +33,10 @@ export const renderUserRoles = async (
     enabledIds,
   );
 
+  enabledGames.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+
   const selected = new Set(
     await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId),
   );
@@ -94,11 +98,16 @@ export const renderUserRoles = async (
       .setLabel("Next")
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(start + PageSize.UserGames >= enabledGames.length),
-    new ButtonBuilder()
-      .setCustomId(`${CustomIds.UserRolesClearAll}|${sessionKey}`)
-      .setLabel("Clear all my game roles")
-      .setStyle(ButtonStyle.Danger),
   );
+
+  if (enabledGames.length > 0) {
+    rowButtons.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`${CustomIds.UserRolesClearAll}|${sessionKey}`)
+        .setLabel("Clear all my game roles")
+        .setStyle(ButtonStyle.Danger),
+    );
+  }
 
   components.push(rowButtons);
   return { embeds: [embed], components };

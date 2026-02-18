@@ -28,21 +28,27 @@ export const renderAdminConfigure = async (
   state: AdminUxState,
 ): Promise<InteractionReplyOptions> => {
   const results = await catalogService.searchAll(state.guildId, state.query);
-  const start = state.page * PageSize.AdminGames;
-  const pageItems = results.slice(start, start + PageSize.AdminGames);
-
   const enabledIds = new Set(
     await guildConfigService.listEnabledGameIds(state.guildId),
   );
+
+  const sorted = [...results].sort((a, b) => {
+    const aEnabled = enabledIds.has(a.id);
+    const bEnabled = enabledIds.has(b.id);
+    if (aEnabled !== bEnabled) return aEnabled ? -1 : 1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  });
+  const start = state.page * PageSize.AdminGames;
+  const pageItems = sorted.slice(start, start + PageSize.AdminGames);
 
   const embed = new EmbedBuilder()
     .setTitle("Configure Games")
     .setDescription(
       [
         `Search: \`${state.query || "(none)"}\``,
-        results.length === 0
+        sorted.length === 0
           ? "Showing 0 of 0"
-          : `Showing ${start + 1}-${Math.min(start + pageItems.length, results.length)} of ${results.length}`,
+          : `Showing ${start + 1}-${Math.min(start + pageItems.length, sorted.length)} of ${sorted.length}`,
         "",
         "Use the buttons below to enable or disable games for this server.",
         "Tip: rerun /gameshare admin configure-games with the optional query argument to filter games.",
@@ -86,7 +92,7 @@ export const renderAdminConfigure = async (
       .setCustomId(`${CustomIds.AdminConfigureNext}|${sessionKey}`)
       .setLabel("Next")
       .setStyle(ButtonStyle.Secondary)
-      .setDisabled(start + PageSize.AdminGames >= results.length),
+      .setDisabled(start + PageSize.AdminGames >= sorted.length),
     new ButtonBuilder()
       .setCustomId(`${CustomIds.AdminConfigureDone}|${sessionKey}`)
       .setLabel("Done")
