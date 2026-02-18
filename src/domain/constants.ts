@@ -5,6 +5,7 @@ export const CustomIds = {
   AdminConfigurePrev: "admin_cfg_prev",
   AdminConfigureNext: "admin_cfg_next",
   AdminConfigureToggleSelect: "admin_cfg_toggle_select",
+  AdminConfigureToggleButton: "admin_cfg_toggle_button",
   AdminConfigureDone: "admin_cfg_done",
   AdminConfigureDeleteRolesToggle: "admin_cfg_delete_roles_toggle",
   AdminConfigureDeleteRolesConfirm: "admin_cfg_delete_roles_confirm",
@@ -41,7 +42,7 @@ export const CustomIds = {
 } as const;
 
 export const PageSize = {
-  AdminGames: 20,
+  AdminGames: 15,
   UserGames: 20,
 } as const;
 

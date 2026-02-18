@@ -51,8 +51,12 @@ export async function handleButtonInteraction(
     return handleDmShareButtons(client, interaction, base);
   }
 
-  // Admin configure small buttons
+  // Admin configure UI buttons
   if (
+    base === CustomIds.AdminConfigurePrev ||
+    base === CustomIds.AdminConfigureNext ||
+    base === CustomIds.AdminConfigureDone ||
+    base === CustomIds.AdminConfigureToggleButton ||
     base === CustomIds.AdminConfigureDeleteRolesToggle ||
     base === CustomIds.AdminConfigureDeleteRolesConfirm
   ) {

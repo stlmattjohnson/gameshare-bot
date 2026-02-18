@@ -2,7 +2,6 @@ import { ModalSubmitInteraction, InteractionResponse } from "discord.js";
 import { parseSessionCustomId } from "../utils.ts";
 import { CustomIds } from "../../domain/constants.ts";
 import { handleDmModals } from "./dmModals.ts";
-import { handleAdminConfigureSearch } from "./adminConfigureSearch.ts";
 
 export const handleModalInteraction = async (
   interaction: ModalSubmitInteraction,
@@ -15,10 +14,6 @@ export const handleModalInteraction = async (
     base === CustomIds.DmModalServerIp
   ) {
     return handleDmModals(interaction);
-  }
-
-  if (base === CustomIds.AdminConfigureSearch) {
-    return handleAdminConfigureSearch(interaction);
   }
 
   return false;

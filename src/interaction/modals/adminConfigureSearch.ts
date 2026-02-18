@@ -27,7 +27,11 @@ export const handleAdminConfigureSearch = async (
     adminUxStore.touch(key);
 
     const q = (interaction.fields.getTextInputValue("query") ?? "").trim();
-    const next = adminUxStore.update(key, (s) => ({ ...s, query: q, page: 0 }));
+    const next = adminUxStore.update(key, (s) => ({
+      ...s,
+      query: q,
+      page: 0,
+    }));
     if (!next)
       return interaction
         .reply(expiredMessage("/gameshare admin configure-games"))
@@ -35,8 +39,19 @@ export const handleAdminConfigureSearch = async (
         .catch(() => true);
 
     const ui = await renderAdminConfigure(key, next);
+
+    // Edit the original admin-configure message in place and just acknowledge
+    // the modal (no new reply).
+    if (interaction.message) {
+      try {
+        await interaction.message.edit(ui as any);
+      } catch {
+        // ignore edit failures; still acknowledge the modal below
+      }
+    }
+
     return interaction
-      .reply(ui)
+      .deferUpdate()
       .then(() => true)
       .catch(() => true);
   }

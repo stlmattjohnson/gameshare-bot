@@ -3,13 +3,9 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  ModalBuilder,
-  StringSelectMenuBuilder,
-  TextInputBuilder,
-  TextInputStyle,
   InteractionReplyOptions,
 } from "discord.js";
-import { CustomIds, PageSize, Limits } from "../../domain/constants.ts";
+import { CustomIds, PageSize } from "../../domain/constants.ts";
 import { guildConfigService } from "../guildConfigService.ts";
 import { StateStore } from "./stateStore.ts";
 import { catalogService } from "../catalogService.ts";
@@ -48,31 +44,32 @@ export const renderAdminConfigure = async (
           ? "Showing 0 of 0"
           : `Showing ${start + 1}-${Math.min(start + pageItems.length, results.length)} of ${results.length}`,
         "",
-        "Select games below to enable/disable.",
+        "Use the buttons below to enable or disable games for this server.",
+        "Tip: rerun /gameshare admin configure-games with the optional query argument to filter games.",
       ].join("\n"),
     );
 
-  const components: ActionRowBuilder<
-    StringSelectMenuBuilder | ButtonBuilder
-  >[] = [];
+  const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
   if (pageItems.length > 0) {
-    const select = new StringSelectMenuBuilder()
-      .setCustomId(`${CustomIds.AdminConfigureToggleSelect}|${sessionKey}`)
-      .setPlaceholder("Toggle games (enable/disable)")
-      .setMinValues(0)
-      .setMaxValues(Math.min(Limits.SelectMaxOptions, pageItems.length))
-      .addOptions(
-        pageItems.map((g) => ({
-          label: g.name.slice(0, 100),
-          value: g.id,
-          description: `${enabledIds.has(g.id) ? "Enabled" : "Disabled"}${g.kind === "CUSTOM" ? " • Custom" : ""}`,
-        })),
-      );
+    const gameButtons = pageItems.map((g) => {
+      const enabled = enabledIds.has(g.id);
+      const prefix = enabled ? "✅" : "⬜";
 
-    components.push(
-      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select),
-    );
+      return new ButtonBuilder()
+        .setCustomId(
+          `${CustomIds.AdminConfigureToggleButton}|${sessionKey}|${g.id}`,
+        )
+        .setLabel(`${prefix} ${g.name.slice(0, 70)}`)
+        .setStyle(enabled ? ButtonStyle.Success : ButtonStyle.Secondary);
+    });
+
+    for (let i = 0; i < gameButtons.length; i += 5) {
+      const chunk = gameButtons.slice(i, i + 5);
+      components.push(
+        new ActionRowBuilder<ButtonBuilder>().addComponents(...chunk),
+      );
+    }
   } else {
     embed.addFields([
       { name: "No results", value: "Try a different search term." },
@@ -80,10 +77,6 @@ export const renderAdminConfigure = async (
   }
 
   const rowButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`${CustomIds.AdminConfigureSearch}|${sessionKey}`)
-      .setLabel("Search")
-      .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId(`${CustomIds.AdminConfigurePrev}|${sessionKey}`)
       .setLabel("Prev")
@@ -125,21 +118,8 @@ export const renderAdminConfigure = async (
   return { embeds: [embed], components };
 };
 
-export const buildAdminSearchModal = (sessionKey: string) => {
-  const modal = new ModalBuilder()
-    .setCustomId(`${CustomIds.AdminConfigureSearch}|${sessionKey}`)
-    .setTitle("Search games");
-
-  const input = new TextInputBuilder()
-    .setCustomId("query")
-    .setLabel("Search query")
-    .setStyle(TextInputStyle.Short)
-    .setRequired(false)
-    .setMaxLength(50)
-    .setPlaceholder("e.g., helldivers");
-
-  modal.addComponents(
-    new ActionRowBuilder<TextInputBuilder>().addComponents(input),
+export const buildAdminSearchModal = () => {
+  throw new Error(
+    "Admin search modal is no longer used. Use the query option on /gameshare admin configure-games instead.",
   );
-  return modal;
 };

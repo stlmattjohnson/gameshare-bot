@@ -60,7 +60,14 @@ export const gameshareCommand = new SlashCommandBuilder()
       .addSubcommand((s) =>
         s
           .setName("configure-games")
-          .setDescription("Enable/disable recognized games"),
+          .setDescription("Enable/disable recognized games")
+          .addStringOption((o) =>
+            o
+              .setName("query")
+              .setDescription("Filter games by name (case-insensitive)")
+              .setRequired(false)
+              .setMaxLength(50),
+          ),
       )
       .addSubcommand((s) =>
         s.setName("status").setDescription("Show config + health status"),
@@ -149,7 +156,12 @@ export const handleGameshare = async (
     }
 
     if (sub === "configure-games") {
-      const state = { guildId: interaction.guildId, query: "", page: 0 };
+      const query = (interaction.options.getString("query") ?? "").trim();
+      const state = {
+        guildId: interaction.guildId,
+        query,
+        page: 0,
+      };
       const key = createAdminSession(state);
       const ui = await renderAdminConfigure(key, state);
       return safeEphemeralReply(interaction, ui);
