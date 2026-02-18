@@ -5,6 +5,7 @@ import { handleAdminRequests } from "./adminRequests.ts";
 import { handleUnknownRequests } from "./unknownRequests.ts";
 import { handleDmShareButtons } from "./dmShare.ts";
 import { handleAdminConfigureButtons } from "./adminConfigure.ts";
+import { handleUserRolesButtons } from "./userRoles.ts";
 
 export async function handleButtonInteraction(
   client: Client,
@@ -49,6 +50,16 @@ export async function handleButtonInteraction(
     base === CustomIds.DmCancelPost
   ) {
     return handleDmShareButtons(client, interaction, base);
+  }
+
+  // User roles UI buttons
+  if (
+    base === CustomIds.UserRolesPrev ||
+    base === CustomIds.UserRolesNext ||
+    base === CustomIds.UserRolesClearAll ||
+    base === CustomIds.UserRolesToggleButton
+  ) {
+    return handleUserRolesButtons(interaction, base);
   }
 
   // Admin configure UI buttons

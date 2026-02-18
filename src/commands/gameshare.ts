@@ -293,7 +293,7 @@ export const handleGameshare = async (
     };
     const key = createUserRolesSession(state);
     const ui = await renderUserRoles(key, state);
-    return safeEphemeralReply(interaction, { ...(ui as any), ephemeral: true });
+    return safeEphemeralReply(interaction, { ...ui, ephemeral: true });
   }
 
   if (sub === "sessions") {

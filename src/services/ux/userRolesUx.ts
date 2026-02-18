@@ -3,10 +3,9 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  InteractionUpdateOptions,
-  StringSelectMenuBuilder,
+  InteractionReplyOptions,
 } from "discord.js";
-import { CustomIds, PageSize, Limits } from "../../domain/constants.ts";
+import { CustomIds, PageSize } from "../../domain/constants.ts";
 import { guildConfigService } from "../guildConfigService.ts";
 import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo.ts";
 import { StateStore } from "./stateStore.ts";
@@ -27,7 +26,7 @@ export const createUserRolesSession = (state: UserRolesState): string => {
 export const renderUserRoles = async (
   sessionKey: string,
   state: UserRolesState,
-): Promise<InteractionUpdateOptions> => {
+): Promise<InteractionReplyOptions> => {
   const enabledIds = await guildConfigService.listEnabledGameIds(state.guildId);
   const enabledGames = await catalogService.getAnyGamesByIds(
     state.guildId,
@@ -49,30 +48,31 @@ export const renderUserRoles = async (
         enabledGames.length === 0
           ? "Showing 0 of 0"
           : `Showing ${start + 1}-${Math.min(start + pageItems.length, enabledGames.length)}`,
+        "",
+        "Use the buttons below to select which game roles you want.",
+        "✅ means you currently have that role; changes apply immediately.",
       ].join("\n"),
     );
 
-  const components: ActionRowBuilder<
-    StringSelectMenuBuilder | ButtonBuilder
-  >[] = [];
+  const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
   if (pageItems.length > 0) {
-    const select = new StringSelectMenuBuilder()
-      .setCustomId(`${CustomIds.UserRolesPickSelect}|${sessionKey}`)
-      .setPlaceholder("Select the games you want roles for")
-      .setMinValues(0)
-      .setMaxValues(Math.min(Limits.SelectMaxOptions, pageItems.length))
-      .addOptions(
-        pageItems.map((g) => ({
-          label: g.name.slice(0, 100),
-          value: g.id,
-          description: selected.has(g.id) ? "Selected" : "Not selected",
-        })),
-      );
+    const gameButtons = pageItems.map((g) => {
+      const isSelected = selected.has(g.id);
+      const prefix = isSelected ? "✅" : "⬜";
 
-    components.push(
-      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select),
-    );
+      return new ButtonBuilder()
+        .setCustomId(`${CustomIds.UserRolesToggleButton}|${sessionKey}|${g.id}`)
+        .setLabel(`${prefix} ${g.name.slice(0, 70)}`)
+        .setStyle(isSelected ? ButtonStyle.Success : ButtonStyle.Secondary);
+    });
+
+    for (let i = 0; i < gameButtons.length; i += 5) {
+      const chunk = gameButtons.slice(i, i + 5);
+      components.push(
+        new ActionRowBuilder<ButtonBuilder>().addComponents(...chunk),
+      );
+    }
   } else {
     embed.addFields([
       {

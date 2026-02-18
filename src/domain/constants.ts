@@ -15,6 +15,7 @@ export const CustomIds = {
   UserRolesPrev: "user_roles_prev",
   UserRolesNext: "user_roles_next",
   UserRolesPickSelect: "user_roles_pick_select",
+  UserRolesToggleButton: "user_roles_toggle_button",
   UserRolesClearAll: "user_roles_clear_all",
 
   // DM share flow
