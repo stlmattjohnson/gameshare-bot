@@ -4,6 +4,7 @@ import { gameAddRequestRepo } from "../db/repositories/gameAddRequestRepo.ts";
 import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 import { guildConfigService } from "./guildConfigService.ts";
 import { roleService } from "./roleService.ts";
+import { catalogService } from "./catalogService.ts";
 
 const makeCustomGameId = () => {
   return `cg_${randomUUID().slice(0, 10)}`;
@@ -27,16 +28,39 @@ export const adminRequestApprovalService = {
         message: "Request not found (maybe already handled).",
       };
 
-    // Create or reuse custom game entry (name = presenceName)
-    const existing = await customGameRepo.findByName(guildId, req.presenceName);
-    const gameId = existing?.id ?? makeCustomGameId();
-    const gameName = existing?.name ?? req.presenceName;
+    // Check if this presence name matches a known static game; if so, just
+    // enable that game for the guild instead of creating a duplicate custom.
+    const matched = await catalogService.matchPresence(
+      guildId,
+      req.presenceName,
+    );
 
-    if (!existing) {
-      await customGameRepo.create(guildId, gameId, gameName, req.presenceName);
+    let gameId: string;
+    let gameName: string;
+
+    if (matched && matched.kind === "STATIC") {
+      gameId = matched.id;
+      gameName = matched.name;
+    } else {
+      // Create or reuse custom game entry (name = presenceName)
+      const existing = await customGameRepo.findByName(
+        guildId,
+        req.presenceName,
+      );
+      gameId = existing?.id ?? makeCustomGameId();
+      gameName = existing?.name ?? req.presenceName;
+
+      if (!existing) {
+        await customGameRepo.create(
+          guildId,
+          gameId,
+          gameName,
+          req.presenceName,
+        );
+      }
     }
 
-    // Enable for guild
+    // Enable for guild (either known static or newly created custom)
     await guildConfigService.enableGame(guildId, gameId);
 
     // Ensure role + mapping

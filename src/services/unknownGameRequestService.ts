@@ -65,6 +65,41 @@ export const unknownGameRequestService = {
     );
   },
 
+  async sendDisabledKnownPrompt(user: User, guildId: string, gameName: string) {
+    const embed = new EmbedBuilder()
+      .setTitle("Game not enabled here")
+      .setDescription(
+        `I see you're playing **${gameName}**, but that game isn't enabled in this server.\n\nWant to ask the admins to enable it?`,
+      );
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId(
+          `${CustomIds.UnknownRequestAdd}|${guildId}|${encodeURIComponent(gameName)}`.slice(
+            0,
+            100,
+          ),
+        )
+        .setLabel("Request Enable")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId(
+          `${CustomIds.UnknownNotNow}|${guildId}|${encodeURIComponent(gameName)}`.slice(
+            0,
+            100,
+          ),
+        )
+        .setLabel("Not now")
+        .setStyle(ButtonStyle.Secondary),
+    );
+
+    await user.send({ embeds: [embed], components: [row] });
+    logger.info(
+      { guildId, userId: user.id, gameName },
+      "Sent disabled-known-game enable prompt",
+    );
+  },
+
   async createRequest(guildId: string, userId: string, presenceName: string) {
     // avoid duplicate spam
     const already = await gameAddRequestRepo.existsPending(

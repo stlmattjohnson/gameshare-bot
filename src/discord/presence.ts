@@ -96,7 +96,24 @@ export const registerPresenceHandler = (client: Client) => {
         }
 
         const enabled = await guildConfigService.isEnabled(guildId, game.id);
-        if (!enabled) return;
+        if (!enabled) {
+          const ok = await unknownGameRequestService.shouldPrompt(
+            guildId,
+            userId,
+            game.name,
+          );
+          if (!ok) return;
+
+          await unknownGameRequestService.markPrompted(
+            guildId,
+            userId,
+            game.name,
+          );
+          await unknownGameRequestService
+            .sendDisabledKnownPrompt(newPresence.user!, guildId, game.name)
+            .catch(() => null);
+          return;
+        }
 
         const canPrompt = await dmShareFlowService.canPrompt(
           guildId,
