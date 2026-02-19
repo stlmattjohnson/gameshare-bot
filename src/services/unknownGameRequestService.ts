@@ -10,6 +10,7 @@ import { gameAddRequestRepo } from "../db/repositories/gameAddRequestRepo.ts";
 import { config } from "../config.ts";
 import { logger } from "../logger.ts";
 import { CustomIds } from "../domain/constants.ts";
+import { ignoredUnknownGameRepo } from "../db/repositories/ignoredUnknownGameRepo.ts";
 
 const addMinutes = (d: Date, minutes: number) => {
   return new Date(d.getTime() + minutes * 60_000);
@@ -17,6 +18,13 @@ const addMinutes = (d: Date, minutes: number) => {
 
 export const unknownGameRequestService = {
   async shouldPrompt(guildId: string, userId: string, presenceName: string) {
+    const ignored = await ignoredUnknownGameRepo.isIgnored(
+      guildId,
+      userId,
+      presenceName,
+    );
+    if (ignored) return false;
+
     const last = await unknownCooldownRepo.getLast(
       guildId,
       userId,
@@ -28,6 +36,10 @@ export const unknownGameRequestService = {
 
   async markPrompted(guildId: string, userId: string, presenceName: string) {
     await unknownCooldownRepo.touch(guildId, userId, presenceName, new Date());
+  },
+
+  async markIgnored(guildId: string, userId: string, presenceName: string) {
+    await ignoredUnknownGameRepo.ignore(guildId, userId, presenceName);
   },
 
   async sendUnknownPrompt(user: User, guildId: string, presenceName: string) {
@@ -56,6 +68,16 @@ export const unknownGameRequestService = {
         )
         .setLabel("Not now")
         .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(
+          `${CustomIds.UnknownIgnore}|${guildId}|${encodeURIComponent(presenceName)}`.slice(
+            0,
+            100,
+          ),
+        )
+        .setEmoji("❌")
+        .setLabel("Ignore")
+        .setStyle(ButtonStyle.Danger),
     );
 
     await user.send({ embeds: [embed], components: [row] });
@@ -91,6 +113,16 @@ export const unknownGameRequestService = {
         )
         .setLabel("Not now")
         .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(
+          `${CustomIds.UnknownIgnore}|${guildId}|${encodeURIComponent(gameName)}`.slice(
+            0,
+            100,
+          ),
+        )
+        .setEmoji("❌")
+        .setLabel("Ignore")
+        .setStyle(ButtonStyle.Danger),
     );
 
     await user.send({ embeds: [embed], components: [row] });

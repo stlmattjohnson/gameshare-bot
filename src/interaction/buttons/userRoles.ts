@@ -8,6 +8,7 @@ import {
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo.ts";
 import { roleService } from "../../services/roleService.ts";
+import { ignoredGameRepo } from "../../db/repositories/ignoredGameRepo.ts";
 
 export const handleUserRolesButtons = async (
   interaction: ButtonInteraction,
@@ -137,40 +138,52 @@ export const handleUserRolesButtons = async (
         .catch(() => true);
     }
 
-    const current = new Set(
-      await userGameRolePrefRepo.listSelectedGameIds(
+    const ignoredIds = new Set(
+      await ignoredGameRepo.listIgnoredGameIds(state.guildId, state.userId),
+    );
+
+    // If this game is currently ignored, clear the ignore state only.
+    if (ignoredIds.has(gameId)) {
+      await ignoredGameRepo.clearIgnore(state.guildId, state.userId, gameId);
+    } else {
+      const current = new Set(
+        await userGameRolePrefRepo.listSelectedGameIds(
+          state.guildId,
+          state.userId,
+        ),
+      );
+
+      if (current.has(gameId)) current.delete(gameId);
+      else current.add(gameId);
+
+      await userGameRolePrefRepo.setSelectedGameIds(
         state.guildId,
         state.userId,
-      ),
-    );
+        Array.from(current),
+      );
 
-    if (current.has(gameId)) current.delete(gameId);
-    else current.add(gameId);
-
-    await userGameRolePrefRepo.setSelectedGameIds(
-      state.guildId,
-      state.userId,
-      Array.from(current),
-    );
-
-    if (interaction.inGuild() && interaction.guild) {
-      const guild = interaction.guild;
-      const member = await guild.members.fetch(state.userId).catch(() => null);
-      if (member) {
-        const roleId = await guildConfigService.getRoleId(
-          state.guildId,
-          gameId,
-        );
-        if (roleId) {
-          const role = guild.roles.cache.get(roleId);
-          if (role) {
-            const wants = current.has(gameId);
-            const has = member.roles.cache.has(roleId);
-            const can = await roleService.canManageRole(guild, role);
-            if (can.ok) {
-              if (wants && !has) await member.roles.add(role).catch(() => null);
-              if (!wants && has)
-                await member.roles.remove(role).catch(() => null);
+      if (interaction.inGuild() && interaction.guild) {
+        const guild = interaction.guild;
+        const member = await guild.members
+          .fetch(state.userId)
+          .catch(() => null);
+        if (member) {
+          const roleId = await guildConfigService.getRoleId(
+            state.guildId,
+            gameId,
+          );
+          if (roleId) {
+            const role = guild.roles.cache.get(roleId);
+            if (role) {
+              const wants = current.has(gameId);
+              const has = member.roles.cache.has(roleId);
+              const can = await roleService.canManageRole(guild, role);
+              if (can.ok) {
+                if (wants && !has)
+                  await member.roles.add(role).catch(() => null);
+                if (!wants && has)
+                  await member.roles.remove(role).catch(() => null);
+              }
             }
           }
         }

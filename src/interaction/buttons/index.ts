@@ -31,7 +31,8 @@ export async function handleButtonInteraction(
   // Unknown request buttons (DM)
   if (
     base === CustomIds.UnknownRequestAdd ||
-    base === CustomIds.UnknownNotNow
+    base === CustomIds.UnknownNotNow ||
+    base === CustomIds.UnknownIgnore
   ) {
     return handleUnknownRequests(
       client,
@@ -46,6 +47,7 @@ export async function handleButtonInteraction(
   if (
     base === CustomIds.DmShareYes ||
     base === CustomIds.DmShareNo ||
+    base === CustomIds.DmShareNeverGame ||
     base === CustomIds.DmTimeout1d ||
     base === CustomIds.DmTimeout1w ||
     base === CustomIds.DmConfirmPost ||

@@ -32,6 +32,7 @@ export const CustomIds = {
   // Unknown-game request buttons (DM)
   UnknownRequestAdd: "unknown_req_add",
   UnknownNotNow: "unknown_not_now",
+  UnknownIgnore: "unknown_ignore",
 
   // Admin review requests UI
   AdminRequestsOpen: "admin_requests_open",

@@ -37,6 +37,20 @@ export const handleUnknownRequests = async (
     return true;
   }
 
+  if (base === CustomIds.UnknownIgnore) {
+    await unknownGameRequestService.markIgnored(
+      key,
+      interaction.user.id,
+      presenceName,
+    );
+    await interaction.user
+      .send(
+        `Okay, I won't prompt you about **${presenceName}** in this server.`,
+      )
+      .catch(() => null);
+    return true;
+  }
+
   const req = await unknownGameRequestService.createRequest(
     key,
     interaction.user.id,

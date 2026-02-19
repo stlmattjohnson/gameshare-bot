@@ -19,6 +19,7 @@ import { guildConfigService } from "./guildConfigService.ts";
 import { prisma } from "../db/prisma.ts";
 import { Share, DetailKind } from "../domain/types.ts";
 import { userDataRepo } from "../db/repositories/userDataRepo.ts";
+import { ignoredGameRepo } from "../db/repositories/ignoredGameRepo.ts";
 
 const now = () => {
   return new Date();
@@ -96,6 +97,14 @@ export const dmShareFlowService = {
     await cooldownRepo.touch(guildId, userId, gameId, now());
   },
 
+  async isIgnored(guildId: string, userId: string, gameId: string) {
+    return ignoredGameRepo.isIgnored(guildId, userId, gameId);
+  },
+
+  async ignoreGame(guildId: string, userId: string, gameId: string) {
+    await ignoredGameRepo.ignore(guildId, userId, gameId);
+  },
+
   async isTimedOut(
     guildId: string,
     userId: string,
@@ -170,11 +179,16 @@ export const dmShareFlowService = {
         .setCustomId(this.dmId(CustomIds.DmTimeout1d, share))
         .setLabel("Timeout: 1 day")
         .setEmoji("⏰")
-        .setStyle(ButtonStyle.Danger),
+        .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(this.dmId(CustomIds.DmTimeout1w, share))
         .setLabel("Timeout: 1 week")
         .setEmoji("⏰")
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(this.dmId(CustomIds.DmShareNeverGame, share))
+        .setLabel("Ignore")
+        .setEmoji("❌")
         .setStyle(ButtonStyle.Danger),
     );
 
@@ -354,7 +368,9 @@ export const dmShareFlowService = {
             : `**Detail:** ${detailLine}`,
         ].join("\n"),
       )
-      .setFooter({ text: "Confirm to post in the server channel." });
+      .setFooter({
+        text: "Confirm to post in the server channel. If this server has a role for this game and you don't already have it, confirming will also add that role.",
+      });
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()

@@ -24,6 +24,9 @@ export const userDataRepo = {
       prisma.promptCooldown.deleteMany({ where: { guildId, userId } }),
       prisma.shareRequestState.deleteMany({ where: { guildId, userId } }),
       prisma.userOptIn.deleteMany({ where: { guildId, userId } }),
+      prisma.gamePromptTimeout.deleteMany({ where: { guildId, userId } }),
+      prisma.ignoredGame.deleteMany({ where: { guildId, userId } }),
+      prisma.ignoredUnknownGame.deleteMany({ where: { guildId, userId } }),
     ]);
   },
 };

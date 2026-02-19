@@ -188,3 +188,25 @@ model GamePromptTimeout {
   @@unique([guildId, userId, gameId])
   @@index([guildId, userId])
 }
+
+model IgnoredGame {
+  id       Int      @id @default(autoincrement())
+  guildId  String
+  userId   String
+  gameId   String
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId, gameId])
+  @@index([guildId, userId])
+}
+
+model IgnoredUnknownGame {
+  id          Int      @id @default(autoincrement())
+  guildId     String
+  userId      String
+  presenceName String
+  createdAt   DateTime @default(now())
+
+  @@unique([guildId, userId, presenceName])
+  @@index([guildId, userId])
+}

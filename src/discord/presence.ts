@@ -115,6 +115,13 @@ export const registerPresenceHandler = (client: Client) => {
           return;
         }
 
+        const ignored = await dmShareFlowService.isIgnored(
+          guildId,
+          userId,
+          game.id,
+        );
+        if (ignored) return;
+
         const timedOut = await dmShareFlowService.isTimedOut(
           guildId,
           userId,

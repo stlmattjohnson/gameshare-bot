@@ -10,6 +10,7 @@ import { guildConfigService } from "../guildConfigService.ts";
 import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo.ts";
 import { StateStore } from "./stateStore.ts";
 import { catalogService } from "../catalogService.ts";
+import { ignoredGameRepo } from "../../db/repositories/ignoredGameRepo.ts";
 
 export type UserRolesState = {
   guildId: string;
@@ -33,16 +34,28 @@ export const renderUserRoles = async (
     enabledIds,
   );
 
-  enabledGames.sort((a, b) =>
+  const ignoredIds = new Set(
+    await ignoredGameRepo.listIgnoredGameIds(state.guildId, state.userId),
+  );
+
+  const nonIgnoredGames = enabledGames.filter((g) => !ignoredIds.has(g.id));
+  const ignoredGames = enabledGames.filter((g) => ignoredIds.has(g.id));
+
+  nonIgnoredGames.sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
   );
+  ignoredGames.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+
+  const orderedGames = [...nonIgnoredGames, ...ignoredGames];
 
   const selected = new Set(
     await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId),
   );
 
   const start = state.page * PageSize.UserGames;
-  const pageItems = enabledGames.slice(start, start + PageSize.UserGames);
+  const pageItems = orderedGames.slice(start, start + PageSize.UserGames);
 
   const embed = new EmbedBuilder()
     .setTitle("Your Game Roles")
@@ -55,6 +68,7 @@ export const renderUserRoles = async (
         "",
         "Use the buttons below to select which game roles you want.",
         "✅ means you currently have that role; changes apply immediately.",
+        "❌ means you've chosen to ignore prompts for that game.",
       ].join("\n"),
     );
 
@@ -63,12 +77,19 @@ export const renderUserRoles = async (
   if (pageItems.length > 0) {
     const gameButtons = pageItems.map((g) => {
       const isSelected = selected.has(g.id);
-      const prefix = isSelected ? "✅" : "⬜";
+      const isIgnored = ignoredIds.has(g.id);
+      const prefix = isIgnored ? "❌" : isSelected ? "✅" : "⬜";
 
       return new ButtonBuilder()
         .setCustomId(`${CustomIds.UserRolesToggleButton}|${sessionKey}|${g.id}`)
         .setLabel(`${prefix} ${g.name.slice(0, 70)}`)
-        .setStyle(isSelected ? ButtonStyle.Success : ButtonStyle.Secondary);
+        .setStyle(
+          isIgnored
+            ? ButtonStyle.Danger
+            : isSelected
+              ? ButtonStyle.Success
+              : ButtonStyle.Secondary,
+        );
     });
 
     for (let i = 0; i < gameButtons.length; i += 5) {

@@ -11,6 +11,7 @@ import { catalogService } from "../../services/catalogService.ts";
 import { guildConfigService } from "../../services/guildConfigService.ts";
 import { resolveGuild } from "../utils.ts";
 import { Share } from "../../domain/types.ts";
+import { roleService } from "../../services/roleService.ts";
 
 export const handleDmShareButtons = async (
   client: Client,
@@ -33,6 +34,29 @@ export const handleDmShareButtons = async (
     gameName,
     detailKind: "NONE",
   };
+
+  if (base === CustomIds.DmShareNeverGame) {
+    await dmShareFlowService
+      .ignoreGame(guildId, userId, gameId)
+      .catch(() => null);
+    await dmShareFlowService
+      .setInFlight(guildId, userId, gameId, false)
+      .catch(() => null);
+
+    await interaction.message
+      .edit({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Ignored")
+            .setDescription(
+              `Okay, I won't prompt you about **${gameName}** in this server.`,
+            ),
+        ],
+        components: [],
+      })
+      .catch(() => null);
+    return true;
+  }
 
   if (base === CustomIds.DmTimeout1d || base === CustomIds.DmTimeout1w) {
     const days = base === CustomIds.DmTimeout1d ? 1 : 7;
@@ -192,6 +216,19 @@ export const handleDmShareButtons = async (
         cached.detailKind,
         cached.detailValue,
       );
+
+      // Ensure the sharer has the game role if they don't already.
+      const member = await guild.members.fetch(userId).catch(() => null);
+      if (member) {
+        const role = guild.roles.cache.get(roleId);
+        if (role) {
+          const can = await roleService.canManageRole(guild, role);
+          const has = member.roles.cache.has(roleId);
+          if (can.ok && !has) {
+            await member.roles.add(role).catch(() => null);
+          }
+        }
+      }
     }
 
     try {
