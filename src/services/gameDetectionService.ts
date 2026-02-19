@@ -5,9 +5,9 @@ export const extractPlayingName = (
   presence: Presence | null,
 ): string | null => {
   if (!presence) return null;
-  const act =
-    presence.activities.find((a) => a.type === ActivityType.Playing) ??
-    presence.activities.find((a) => a.name && a.type !== ActivityType.Custom);
+  const act = presence.activities.find(
+    (a) => a.type === ActivityType.Playing && a.name,
+  );
 
   return act?.name ?? null;
 };
