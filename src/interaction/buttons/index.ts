@@ -46,6 +46,8 @@ export async function handleButtonInteraction(
   if (
     base === CustomIds.DmShareYes ||
     base === CustomIds.DmShareNo ||
+    base === CustomIds.DmTimeout1d ||
+    base === CustomIds.DmTimeout1w ||
     base === CustomIds.DmConfirmPost ||
     base === CustomIds.DmCancelPost
   ) {

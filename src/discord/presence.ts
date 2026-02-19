@@ -115,6 +115,13 @@ export const registerPresenceHandler = (client: Client) => {
           return;
         }
 
+        const timedOut = await dmShareFlowService.isTimedOut(
+          guildId,
+          userId,
+          game.id,
+        );
+        if (timedOut) return;
+
         const canPrompt = await dmShareFlowService.canPrompt(
           guildId,
           userId,

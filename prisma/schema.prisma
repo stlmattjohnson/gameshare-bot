@@ -178,3 +178,14 @@ model Session {
   @@index([guildId])
   @@index([userId])
 }
+
+model GamePromptTimeout {
+  id       Int      @id @default(autoincrement())
+  guildId  String
+  userId   String
+  gameId   String
+  until    DateTime
+
+  @@unique([guildId, userId, gameId])
+  @@index([guildId, userId])
+}

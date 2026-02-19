@@ -14,6 +14,7 @@ import { CustomIds } from "../domain/constants.ts";
 import { logger } from "../logger.ts";
 import { config } from "../config.ts";
 import { cooldownRepo } from "../db/repositories/cooldownRepo.ts";
+import { gamePromptTimeoutRepo } from "../db/repositories/gamePromptTimeoutRepo.ts";
 import { guildConfigService } from "./guildConfigService.ts";
 import { prisma } from "../db/prisma.ts";
 import { Share, DetailKind } from "../domain/types.ts";
@@ -95,6 +96,30 @@ export const dmShareFlowService = {
     await cooldownRepo.touch(guildId, userId, gameId, now());
   },
 
+  async isTimedOut(
+    guildId: string,
+    userId: string,
+    gameId: string,
+  ): Promise<boolean> {
+    const row = await gamePromptTimeoutRepo.get(guildId, userId, gameId);
+    if (!row) return false;
+    return row.until > now();
+  },
+
+  async setTimeoutDays(
+    guildId: string,
+    userId: string,
+    gameId: string,
+    days: number,
+  ) {
+    const until = new Date(now().getTime() + days * 24 * 60 * 60_000);
+    await gamePromptTimeoutRepo.upsert(guildId, userId, gameId, until);
+  },
+
+  async clearTimeouts(guildId: string, userId: string) {
+    await gamePromptTimeoutRepo.clearForUser(guildId, userId);
+  },
+
   async setInFlight(
     guildId: string,
     userId: string,
@@ -141,6 +166,16 @@ export const dmShareFlowService = {
         .setCustomId(this.dmId(CustomIds.DmShareNo, share))
         .setLabel("Not now")
         .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(this.dmId(CustomIds.DmTimeout1d, share))
+        .setLabel("Timeout: 1 day")
+        .setEmoji("⏰")
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId(this.dmId(CustomIds.DmTimeout1w, share))
+        .setLabel("Timeout: 1 week")
+        .setEmoji("⏰")
+        .setStyle(ButtonStyle.Danger),
     );
 
     try {

@@ -22,6 +22,8 @@ export const CustomIds = {
   DmShareYes: "dm_share_yes",
   DmShareNo: "dm_share_no",
   DmShareNeverGame: "dm_share_never_game",
+  DmTimeout1d: "dm_timeout_1d",
+  DmTimeout1w: "dm_timeout_1w",
   DmDetailPick: "dm_detail_pick",
   DmModalSteam: "dm_modal_steam",
   DmModalServerName: "dm_modal_server_name",

@@ -34,11 +34,42 @@ export const handleDmShareButtons = async (
     detailKind: "NONE",
   };
 
+  if (base === CustomIds.DmTimeout1d || base === CustomIds.DmTimeout1w) {
+    const days = base === CustomIds.DmTimeout1d ? 1 : 7;
+    await dmShareFlowService
+      .setTimeoutDays(guildId, userId, gameId, days)
+      .catch(() => null);
+    await dmShareFlowService
+      .setInFlight(guildId, userId, gameId, false)
+      .catch(() => null);
+
+    const desc = `Okay, I won't prompt you about **${gameName}** for ${days} day${days === 1 ? "" : "s"}.\nYou can clear this later with "/gameshare cancel-timeouts".`;
+
+    await interaction.message
+      .edit({
+        embeds: [
+          new EmbedBuilder().setTitle("Prompts paused").setDescription(desc),
+        ],
+        components: [],
+      })
+      .catch(() => null);
+    return true;
+  }
+
   if (base === CustomIds.DmShareNo) {
     await dmShareFlowService
       .setInFlight(guildId, userId, gameId, false)
       .catch(() => null);
-    await interaction.message.edit({ components: [] }).catch(() => null);
+    await interaction.message
+      .edit({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Got it")
+            .setDescription(`We won't share this session of **${gameName}**`),
+        ],
+        components: [],
+      })
+      .catch(() => null);
     return true;
   }
 
