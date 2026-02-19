@@ -121,7 +121,6 @@ export async function handleAdmin(
       `**Announce channel:** ${cfg.announceChannelId ? `<#${cfg.announceChannelId}>` : "_not set_"}`,
       `**Request channel:** ${cfg.requestChannelId ? `<#${cfg.requestChannelId}>` : "_not set_"}`,
       `**Enabled games:** ${enabledIds.length}`,
-      `**Delete roles for disabled games (default OFF):** ${cfg.deleteDisabledRoles ? "ON" : "OFF"}`,
       "",
       enabledNames.length
         ? `**Some enabled games:** ${enabledNames.join(", ")}`

@@ -98,29 +98,7 @@ export const renderAdminConfigure = async (
       .setLabel("Done")
       .setStyle(ButtonStyle.Primary),
   );
-
-  const cfg = await guildConfigService.getOrCreate(state.guildId);
-
-  const rowDeleteOpt = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId(
-        `${CustomIds.AdminConfigureDeleteRolesToggle}|${state.guildId}`,
-      )
-      .setLabel(
-        `Delete roles for disabled games: ${cfg.deleteDisabledRoles ? "ON" : "OFF"}`,
-      )
-      .setStyle(
-        cfg.deleteDisabledRoles ? ButtonStyle.Success : ButtonStyle.Secondary,
-      ),
-    new ButtonBuilder()
-      .setCustomId(
-        `${CustomIds.AdminConfigureDeleteRolesConfirm}|${state.guildId}`,
-      )
-      .setLabel("Delete disabled roles NOW…")
-      .setStyle(ButtonStyle.Danger),
-  );
-
-  components.push(rowButtons, rowDeleteOpt);
+  components.push(rowButtons);
   return { embeds: [embed], components };
 };
 

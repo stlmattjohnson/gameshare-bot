@@ -69,9 +69,7 @@ export async function handleButtonInteraction(
     base === CustomIds.AdminConfigurePrev ||
     base === CustomIds.AdminConfigureNext ||
     base === CustomIds.AdminConfigureDone ||
-    base === CustomIds.AdminConfigureToggleButton ||
-    base === CustomIds.AdminConfigureDeleteRolesToggle ||
-    base === CustomIds.AdminConfigureDeleteRolesConfirm
+    base === CustomIds.AdminConfigureToggleButton
   ) {
     return handleAdminConfigureButtons(interaction, base);
   }

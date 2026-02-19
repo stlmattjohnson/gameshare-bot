@@ -25,12 +25,4 @@ export const guildConfigRepo = {
       create: { guildId, requestChannelId: channelId },
     });
   },
-
-  async setDeleteDisabledRoles(guildId: string, enabled: boolean) {
-    return prisma.guildConfig.upsert({
-      where: { guildId },
-      update: { deleteDisabledRoles: enabled },
-      create: { guildId, deleteDisabledRoles: enabled },
-    });
-  },
 };

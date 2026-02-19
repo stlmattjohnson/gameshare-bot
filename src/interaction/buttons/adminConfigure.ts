@@ -105,25 +105,19 @@ export const handleAdminConfigureButtons = async (
         await guildConfigService.setRoleId(state.guildId, gameId, role.id);
       } else {
         await guildConfigService.disableGame(state.guildId, gameId);
+        const roleId = await guildConfigService.getRoleId(
+          state.guildId,
+          gameId,
+        );
 
-        const cfg = await guildConfigService.getOrCreate(state.guildId);
-        if (cfg.deleteDisabledRoles) {
-          const roleId = await guildConfigService.getRoleId(
-            state.guildId,
-            gameId,
-          );
-
-          if (roleId) {
-            const role =
-              guild.roles.cache.get(roleId) ??
-              (await guild.roles.fetch(roleId).catch(() => null));
-            if (role) {
-              const canManage = await roleService.canManageRole(guild, role);
-              if (canManage.ok) {
-                await role.delete(
-                  "GameShare: disabled game and deleteDisabledRoles is ON",
-                );
-              }
+        if (roleId) {
+          const role =
+            guild.roles.cache.get(roleId) ??
+            (await guild.roles.fetch(roleId).catch(() => null));
+          if (role) {
+            const canManage = await roleService.canManageRole(guild, role);
+            if (canManage.ok) {
+              await role.delete("GameShare: disabled game - cleaning up role");
             }
           }
         }
@@ -155,45 +149,6 @@ export const handleAdminConfigureButtons = async (
         .then(() => true)
         .catch(() => true);
     }
-  }
-
-  // Delete-roles configuration buttons (not tied to the paged session)
-  if (base === CustomIds.AdminConfigureDeleteRolesToggle) {
-    if (!interaction.inGuild() || !interaction.guildId) {
-      return interaction.reply({ content: "Guild only.", ephemeral: true });
-    }
-    const guildId = interaction.customId.split("|")[1];
-    if (!guildId)
-      return interaction.reply({
-        content: "State expired. Run /gameshare admin configure-games again.",
-        ephemeral: true,
-      });
-
-    const memberPerms = interaction.memberPermissions;
-    const isAdmin =
-      memberPerms?.has(PermissionFlagsBits.ManageGuild) ||
-      memberPerms?.has(PermissionFlagsBits.Administrator);
-    if (!isAdmin)
-      return interaction.reply({ content: "Admin only.", ephemeral: true });
-
-    const cfg = await guildConfigService.getOrCreate(guildId);
-    await guildConfigService.setDeleteDisabledRoles(
-      guildId,
-      !cfg.deleteDisabledRoles,
-    );
-
-    return interaction.reply({
-      content: `✅ Delete roles for disabled games is now **${!cfg.deleteDisabledRoles ? "ON" : "OFF"}**.`,
-      ephemeral: true,
-    });
-  }
-
-  if (base === CustomIds.AdminConfigureDeleteRolesConfirm) {
-    return interaction.reply({
-      content:
-        "This build does not auto-delete roles yet (safe default). Disable games and manually delete roles if desired.",
-      ephemeral: true,
-    });
   }
 
   return false;

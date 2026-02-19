@@ -7,8 +7,6 @@ export const CustomIds = {
   AdminConfigureToggleSelect: "admin_cfg_toggle_select",
   AdminConfigureToggleButton: "admin_cfg_toggle_button",
   AdminConfigureDone: "admin_cfg_done",
-  AdminConfigureDeleteRolesToggle: "admin_cfg_delete_roles_toggle",
-  AdminConfigureDeleteRolesConfirm: "admin_cfg_delete_roles_confirm",
 
   // User roles UX
   UserRolesOpen: "user_roles_open",
