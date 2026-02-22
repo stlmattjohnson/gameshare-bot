@@ -5,6 +5,7 @@ import { customGameRepo } from "../db/repositories/customGameRepo.ts";
 import { guildConfigService } from "./guildConfigService.ts";
 import { roleService } from "./roleService.ts";
 import { catalogService } from "./catalogService.ts";
+import { userGameRolePrefRepo } from "../db/repositories/userGameRolePrefRepo.ts";
 
 const makeCustomGameId = () => {
   return `cg_${randomUUID().slice(0, 10)}`;
@@ -93,7 +94,21 @@ export const adminRequestApprovalService = {
               (e as Error)?.message ?? "Failed to add role.";
           });
 
-          if (!requesterRoleAddMessage) requesterRoleAdded = true;
+          if (!requesterRoleAddMessage) {
+            requesterRoleAdded = true;
+            // Reflect this preference in the DB so the requester keeps this game role.
+            const current = new Set(
+              await userGameRolePrefRepo.listSelectedGameIds(
+                guildId,
+                req.userId,
+              ),
+            );
+
+            await userGameRolePrefRepo.setSelectedGameIds(guildId, req.userId, [
+              ...Array.from(current),
+              gameId,
+            ]);
+          }
         }
       }
     } catch (e) {

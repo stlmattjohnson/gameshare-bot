@@ -196,13 +196,16 @@ export const handleUserRolesButtons = async (
         ),
       );
 
-      if (current.has(gameId)) current.delete(gameId);
-      else current.add(gameId);
+      let newArray = [];
+
+      if (current.has(gameId))
+        newArray = Array.from(current).filter((id) => id !== gameId);
+      else newArray = [...Array.from(current), gameId];
 
       await userGameRolePrefRepo.setSelectedGameIds(
         state.guildId,
         state.userId,
-        Array.from(current),
+        newArray,
       );
 
       if (interaction.inGuild() && interaction.guild) {

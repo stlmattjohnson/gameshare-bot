@@ -142,7 +142,6 @@ export const registerPresenceHandler = (client: Client) => {
           userId,
           game.id,
         );
-        console.log({ inFlight }); // --- IGNORE ---
         if (inFlight) return;
 
         const user = await client.users.fetch(userId).catch(() => null);

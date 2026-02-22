@@ -69,9 +69,7 @@ export const handleDmModals = async (
     dmShareFlowService.cachePut(share);
     await dmShareFlowService
       .sendPreviewDm(interaction.user, share)
-      .catch((err) => {
-        console.error("sendPreviewDm error:", err);
-      });
+      .catch(() => {});
 
     try {
       await interaction.editReply({
