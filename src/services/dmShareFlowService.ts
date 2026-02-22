@@ -158,6 +158,46 @@ export const dmShareFlowService = {
     return row?.status === "IN_FLIGHT";
   },
 
+  async tryAcquirePromptSlot(
+    guildId: string,
+    userId: string,
+    gameId: string,
+  ): Promise<boolean> {
+    try {
+      const acquired = await prisma.$transaction(async (tx) => {
+        const existing = await tx.shareRequestState.findUnique({
+          where: { guildId_userId_gameId: { guildId, userId, gameId } },
+        });
+
+        if (existing && existing.status === "IN_FLIGHT") {
+          return false;
+        }
+
+        if (existing) {
+          await tx.shareRequestState.update({
+            where: { id: existing.id },
+            data: { status: "IN_FLIGHT" },
+          });
+        } else {
+          await tx.shareRequestState.create({
+            data: {
+              guildId,
+              userId,
+              gameId,
+              status: "IN_FLIGHT",
+            },
+          });
+        }
+
+        return true;
+      });
+
+      return acquired;
+    } catch {
+      return false;
+    }
+  },
+
   async sendInitialDm(user: User, share: Share) {
     const embed = new EmbedBuilder()
       .setTitle("Share your game?")
@@ -549,6 +589,15 @@ export const dmShareFlowService = {
   async markSessionInactiveById(sessionId: number) {
     await prisma.session
       .update({ where: { id: sessionId }, data: { active: false } })
+      .catch(() => null);
+  },
+
+  async markSessionsInactiveForUser(guildId: string, userId: string) {
+    await prisma.session
+      .updateMany({
+        where: { guildId, userId, active: true },
+        data: { active: false },
+      })
       .catch(() => null);
   },
 
