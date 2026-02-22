@@ -57,6 +57,7 @@ export const unknownGameRequestService = {
             100,
           ),
         )
+        .setEmoji("✅")
         .setLabel("Request Add")
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
@@ -66,6 +67,7 @@ export const unknownGameRequestService = {
             100,
           ),
         )
+        .setEmoji("❌")
         .setLabel("Not now")
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
@@ -75,7 +77,7 @@ export const unknownGameRequestService = {
             100,
           ),
         )
-        .setEmoji("❌")
+        .setEmoji("✖️")
         .setLabel("Ignore")
         .setStyle(ButtonStyle.Danger),
     );
@@ -102,6 +104,7 @@ export const unknownGameRequestService = {
             100,
           ),
         )
+        .setEmoji("✅")
         .setLabel("Request Enable")
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
@@ -111,6 +114,7 @@ export const unknownGameRequestService = {
             100,
           ),
         )
+        .setEmoji("❌")
         .setLabel("Not now")
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
@@ -120,7 +124,7 @@ export const unknownGameRequestService = {
             100,
           ),
         )
-        .setEmoji("❌")
+        .setEmoji("✖️")
         .setLabel("Ignore")
         .setStyle(ButtonStyle.Danger),
     );

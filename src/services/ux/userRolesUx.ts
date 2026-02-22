@@ -11,6 +11,7 @@ import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo
 import { StateStore } from "./stateStore.ts";
 import { catalogService } from "../catalogService.ts";
 import { ignoredGameRepo } from "../../db/repositories/ignoredGameRepo.ts";
+import { ignoredUnknownGameRepo } from "../../db/repositories/ignoredUnknownGameRepo.ts";
 
 export type UserRolesState = {
   guildId: string;
@@ -48,7 +49,16 @@ export const renderUserRoles = async (
     a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
   );
 
-  const orderedGames = [...nonIgnoredGames, ...ignoredGames];
+  const ignoredUnknownGames = await ignoredUnknownGameRepo.listIgnoredGameIds(
+    state.guildId,
+    state.userId,
+  );
+
+  const orderedGames = [
+    ...nonIgnoredGames,
+    ...ignoredGames,
+    ...ignoredUnknownGames,
+  ];
 
   const selected = new Set(
     await userGameRolePrefRepo.listSelectedGameIds(state.guildId, state.userId),
@@ -76,6 +86,13 @@ export const renderUserRoles = async (
 
   if (pageItems.length > 0) {
     const gameButtons = pageItems.map((g) => {
+      if (typeof g === "string") {
+        return new ButtonBuilder()
+          .setCustomId(`${CustomIds.UserRolesToggleButton}|${sessionKey}|${g}`)
+          .setLabel(`❌ ${g.slice(0, 70)}`)
+          .setStyle(ButtonStyle.Danger);
+      }
+
       const isSelected = selected.has(g.id);
       const isIgnored = ignoredIds.has(g.id);
       const prefix = isIgnored ? "❌" : isSelected ? "✅" : "⬜";

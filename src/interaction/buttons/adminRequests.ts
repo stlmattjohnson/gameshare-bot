@@ -3,11 +3,11 @@ import {
   ButtonInteraction,
   InteractionResponse,
   Client,
+  EmbedBuilder,
 } from "discord.js";
 import { CustomIds } from "../../domain/constants.ts";
 import {
   adminRequestsUxStore,
-  renderAdminRequests,
   renderAdminRequestsUpdate,
 } from "../../services/ux/adminRequestsUx.ts";
 import { adminRequestApprovalService } from "../../services/adminRequestApprovalService.ts";
@@ -136,7 +136,13 @@ export const handleAdminRequests = async (
         : `⚠️ Could not add requester <@${res.requesterUserId}> to the role: ${res.requesterRoleAddMessage ?? "unknown reason"}`;
       await interaction
         .followUp({
-          content: `✅ Approved. Added **${res.gameName}** and enabled it for this server.\n${addLine}`,
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("✅ Approved")
+              .setDescription(
+                `Added **${res.gameName}** and enabled it for this server.\n\n${addLine}`,
+              ),
+          ],
           ephemeral: true,
         })
         .catch(() => null);

@@ -9,6 +9,7 @@ import { guildConfigService } from "../../services/guildConfigService.ts";
 import { userGameRolePrefRepo } from "../../db/repositories/userGameRolePrefRepo.ts";
 import { roleService } from "../../services/roleService.ts";
 import { ignoredGameRepo } from "../../db/repositories/ignoredGameRepo.ts";
+import { ignoredUnknownGameRepo } from "../../db/repositories/ignoredUnknownGameRepo.ts";
 
 export const handleUserRolesButtons = async (
   interaction: ButtonInteraction,
@@ -127,6 +128,36 @@ export const handleUserRolesButtons = async (
         .then(() => true)
         .catch(() => true);
 
+    const isIgnoredUnknown = await ignoredUnknownGameRepo.isIgnored(
+      state.guildId,
+      state.userId,
+      gameId,
+    );
+
+    if (isIgnoredUnknown) {
+      await ignoredUnknownGameRepo.clearIgnore(
+        state.guildId,
+        state.userId,
+        gameId,
+      );
+
+      const refreshed = userRolesUxStore.get(key);
+      if (!refreshed)
+        return interaction
+          .reply({
+            content: "State expired. Run /gameshare roles",
+            ephemeral: true,
+          })
+          .then(() => true)
+          .catch(() => true);
+
+      const ui = await renderUserRoles(key, refreshed);
+      return interaction
+        .update({ ...(ui as any), flags: undefined })
+        .then(() => true)
+        .catch(() => true);
+    }
+
     const enabledIds = await guildConfigService.listEnabledGameIds(
       state.guildId,
     );
@@ -138,9 +169,21 @@ export const handleUserRolesButtons = async (
         .catch(() => true);
     }
 
-    const ignoredIds = new Set(
+    const ignoredKnownGameIds = new Set(
       await ignoredGameRepo.listIgnoredGameIds(state.guildId, state.userId),
     );
+
+    const ignoredUnknownGameIds = new Set(
+      await ignoredUnknownGameRepo.listIgnoredGameIds(
+        state.guildId,
+        state.userId,
+      ),
+    );
+
+    const ignoredIds = new Set([
+      ...ignoredKnownGameIds,
+      ...ignoredUnknownGameIds,
+    ]);
 
     // If this game is currently ignored, clear the ignore state only.
     if (ignoredIds.has(gameId)) {

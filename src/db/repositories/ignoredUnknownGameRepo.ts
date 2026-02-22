@@ -25,4 +25,12 @@ export const ignoredUnknownGameRepo = {
       where: { guildId, userId, presenceName },
     });
   },
+
+  async listIgnoredGameIds(guildId: string, userId: string): Promise<string[]> {
+    const rows = await prisma.ignoredUnknownGame.findMany({
+      where: { guildId, userId },
+      select: { presenceName: true },
+    });
+    return rows.map((r) => r.presenceName);
+  },
 };
